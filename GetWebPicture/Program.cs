@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -12,9 +13,8 @@ namespace Mp3AlbumCoverUpdater
 		static bool hadError = false;
 		static string thisExe, thisFolder, thisBaseFolder;
 		
-		/// <summary>
-		/// 应用程序的主入口点。
-		/// </summary>
+		static List<Provider> Providers = new List<Provider>();
+
 		[STAThread]
 		static void Main()
 		{			
@@ -39,6 +39,13 @@ namespace Mp3AlbumCoverUpdater
 			Log("thisFolder : " + thisFolder); // 
 			Log("thisBaseFolder : " + thisBaseFolder); // 
 			
+			Providers.Add(new Provider("Google", "googURL"));
+			Providers.Add(new Provider("Last FM", "lastFmURL"));
+			foreach (var provider in Providers) {
+				Log("provider : " + provider.Label + " (" + provider.Url + ")");
+			}
+			
+			
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 			Application.Run(new frmMp3Album());
@@ -47,7 +54,7 @@ namespace Mp3AlbumCoverUpdater
 			Log("mp3-cover-online-update end", "end");
 
 			if (hadError) {
-				MessageBox.Show("Some error(s) happended, look at " + thisBaseFolder + logFile);
+				MessageBox.Show("Some error(s) happened, look at " + thisBaseFolder + logFile);
 			}
 		}
 		

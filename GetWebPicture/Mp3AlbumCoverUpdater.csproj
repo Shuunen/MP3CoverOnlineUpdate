@@ -73,6 +73,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Provider.cs" />
     <Compile Include="frmMp3Album.cs">
       <SubType>Form</SubType>
     </Compile>

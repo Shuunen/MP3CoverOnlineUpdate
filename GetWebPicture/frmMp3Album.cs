@@ -44,14 +44,8 @@ namespace Mp3AlbumCoverUpdater
 
 		public class ThreadInfo
 		{
-			public int iStart {
-				get;
-				set;
-			}
-			public int iEnd {
-				get;
-				set;
-			}
+			public int iStart { get; set; }
+			public int iEnd { get; set; }
 		}
 
 		private void btnStart_Click(object sender, EventArgs e)
