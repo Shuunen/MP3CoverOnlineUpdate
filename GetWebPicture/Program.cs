@@ -7,10 +7,7 @@ using System.Windows.Forms;
 namespace Mp3AlbumCoverUpdater
 {
 	static class Program
-	{
-		const string logFile = "debug.log";
-		static StreamWriter logInstance;
-		static bool hadError = false;
+	{		
 		static string thisExe, thisFolder, thisBaseFolder;
 		
 		static List<Provider> Providers = new List<Provider>();
@@ -21,94 +18,36 @@ namespace Mp3AlbumCoverUpdater
 			thisExe = Application.ExecutablePath; // C:\Projects\mp3-cover-online-update\GetWebPicture\bin\Mp3AlbumCoverUpdater.exe
 			thisFolder = Path.GetDirectoryName(Application.ExecutablePath) + "\\";  // C:\Projects\mp3-cover-online-update\GetWebPicture\bin\	
 			thisBaseFolder = thisFolder.Replace("GetWebPicture\\bin\\", ""); // C:\Projects\mp3-cover-online-update\
-			logInstance = new StreamWriter(thisBaseFolder + logFile);
-			logInstance.AutoFlush = true;
+						
+			// splash			
+			Logger.Draw("\n");
+			Logger.Draw("           ___                                     _     _        ");
+			Logger.Draw(" _____ ___|_  |   ___ ___ _ _ ___ ___    _ _ ___ _| |___| |_ ___  ");
+			Logger.Draw("|     | . |_  |  |  _| . | | | -_|  _|  | | | . | . | .'|  _| -_| ");
+			Logger.Draw("|_|_|_|  _|___|  |___|___|\\_/|___|_|    |___|  _|___|__,|_| |___| ");
+			Logger.Draw("      |_|                                   |_|                  			 ");
+			Logger.Draw("			 ");
 			
-			// splash
-			Log("\n", "draw");
-			Log("           ___                                     _     _        ", "draw");
-			Log(" _____ ___|_  |   ___ ___ _ _ ___ ___    _ _ ___ _| |___| |_ ___  ", "draw");
-			Log("|     | . |_  |  |  _| . | | | -_|  _|  | | | . | . | .'|  _| -_| ", "draw");
-			Log("|_|_|_|  _|___|  |___|___|\\_/|___|_|    |___|  _|___|__,|_| |___| ", "draw");
-			Log("      |_|                                   |_|                  			 ", "draw");
-			Log("			 ", "draw");
-			
-			// log parameters
-			Log("Variables", "title");
-			Log("thisExe : " + thisExe); // 
-			Log("thisFolder : " + thisFolder); // 
-			Log("thisBaseFolder : " + thisBaseFolder); // 
-			
+			// Logger.Draw parameters
+			Logger.Title("Variables");
+			Logger.Log("thisExe : " + thisExe); // 
+			Logger.Log("thisFolder : " + thisFolder); // 
+			Logger.Log("thisBaseFolder : " + thisBaseFolder); // 
+						
 			Providers.Add(new Provider("Google", "googURL"));
-			Providers.Add(new Provider("Last FM", "lastFmURL"));
+			Providers.Add(new Provider("LastFm", "lastFmURL"));
 			foreach (var provider in Providers) {
-				Log("provider : " + provider.Label + " (" + provider.Url + ")");
+				Logger.Log("provider : " + provider.ID + " -> " + provider.Label + " (" + provider.Url + ")");
 			}
-			
-			
+						
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 			Application.Run(new frmMp3Album());
 			
-			// close log
-			Log("mp3-cover-online-update end", "end");
-
-			if (hadError) {
-				MessageBox.Show("Some error(s) happened, look at " + thisBaseFolder + logFile);
-			}
-		}
-		
-		static string logPrefix, logSuffix, logSpaces;
-		const int logMargin = 18;
-
-		static void Log(string str, string type = "debug")
-		{
-
-			logPrefix = "";
-			logSuffix = "";
-
-			switch (type) {
-				case "error":
-					hadError = true;
-					logPrefix = "\n\n[ ERROR ] ";
-					logSuffix = "\n\n";
-					break;
-				case "debug":
-					logPrefix = "[ debug ] ";
-					break;
-				case "title":
-					logPrefix = "\n\n- ";
-					logSuffix = "\n------------------------------";
-					break;
-				case "end":
-					logPrefix = "\n\n=============================\n= ";
-					logSuffix = "\n=============================";
-					break;
-				case "draw":
-					logPrefix = " ";
-					break;
-			}
-			
-			int index = str.IndexOf(":", StringComparison.Ordinal);
-			if (index > 0 && (logMargin - index) > 0) {
-				try {
-					logSpaces = new string(' ', logMargin - index);
-					str = str.Substring(0, index) + logSpaces + " : " + str.Substring(index + 1);
-				} catch (Exception ex) {
-					str = str + "\n\n" + ex + "\n\n";
-				}
-			}
-			
-			str = logPrefix + str + logSuffix;
-			
-			logInstance.WriteLine(str);
-
-			logInstance.Flush();
-
-			if (type == "end") {
-				logInstance.Close();
-			}
-		}
+			// close Logger.Draw
+			Logger.Close("mp3-cover-online-update end");
+	
+		}	
 		
 		static string RemoveSpecialCharacters(string str)
 		{
