@@ -19,9 +19,6 @@ namespace Mp3AlbumCoverUpdater
 		private bool _IsShown = true;
 		private readonly int _EffectCount = 10;
 		private readonly int _EffectTime = 500;
-		/// <summary>
-		/// 控制界面显示的特性
-		/// </summary>
 		private Timer _Timer;
 		public string Message = "";
 		public int TimeSpan = 0;
@@ -31,6 +28,7 @@ namespace Mp3AlbumCoverUpdater
 		#region frmWaitingBox
 		public frmWaitingBox(EventHandler<EventArgs> method, int maxWaitTime, string waitMessage, bool cancelEnable, bool timerVisable)
 		{
+			Logger.Title("frmWaitingBox");
 			maxWaitTime *= 1000;
 			Initialize(method, maxWaitTime, waitMessage, cancelEnable, timerVisable);
 		}
@@ -39,6 +37,7 @@ namespace Mp3AlbumCoverUpdater
 		#region Initialize
 		private void Initialize(EventHandler<EventArgs> method, int maxWaitTime, string waitMessage, bool cancelEnable, bool timerVisable)
 		{
+			Logger.Log("Initialize");
 			InitializeComponent();            
 			this.FormBorderStyle = FormBorderStyle.None;
 			this.StartPosition = FormStartPosition.CenterParent;
@@ -66,7 +65,7 @@ namespace Mp3AlbumCoverUpdater
 		#region Events
 		private void btnCancel_Click(object sender, EventArgs e)
 		{
-			this.Message = "您结束了当前操作！";
+			this.Message = "Message1！";
 			this.DialogResult = DialogResult.OK;
 		}
 
@@ -76,7 +75,7 @@ namespace Mp3AlbumCoverUpdater
 			this.labTimer.Text = string.Format("{0}ms", _WaitTime);
 			if (!this._AsyncResult.IsCompleted) {
 				if (_WaitTime > _MaxWaitTime) {
-					Message = string.Format("处理数据超时{0}ms，结束当前操作！", _MaxWaitTime);
+					Message = string.Format("Message2{0}ms，Message3！", _MaxWaitTime);
 					this.DialogResult = DialogResult.OK;
 				}
 			} else {

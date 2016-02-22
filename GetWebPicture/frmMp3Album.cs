@@ -22,8 +22,7 @@ namespace Mp3AlbumCoverUpdater
 			InitializeComponent();
 		}
 
-		WebClient myWebClient = new WebClient();
-		string SourceCode = "";
+		WebClient myWebClient = new WebClient();		
 		ArrayList httpList;
 		int iThread;
 		Mp3File Mp3File = null;
@@ -33,11 +32,11 @@ namespace Mp3AlbumCoverUpdater
 		private string strEngine = "";
 		
 		const string strurlBaidu = "http://image.baidu.com/i?tn=baiduimage&ipn=r&ct=201326592&cl=2&lm=-1&st=-1&fm=result&fr=&sf=1&fmq=&pv=&ic=0&nc=1&z=&se=1&showtab=0&fb=0&width=&height=&face=0&istype=2&ie=utf-8&word=";
-		const string strurlQQ = "http://soso.music.qq.com/fcgi-bin/music_json.fcg?mid=1&catZhida=1&lossless=0&json=1&w=Key&num=30&t=8&p=1&utf8=1&searchid=216648286573551810&remoteplace=sizer.yqqlist.album&g_tk=5381&loginUin=0&hostUin=0&format=yqq&jsonpCallback=MusicJsonCallback&needNewCode=0";
-		const string strurlGoogle = "http://www.google.com.hk/search?newwindow=1&safe=strict&hl=zh-CN&biw=1366&bih=654&site=imghp&tbm=isch&sa=1&q=";
+		const string strurlGoogle = "http://www.google.com/search?newwindow=1&safe=strict&biw=1366&bih=654&site=imghp&tbm=isch&sa=1&q=";
 		const string strurlXiaMi = "http://www.xiami.com/search?spm=a1z1s.3521873.23310045.1.AKUtUf&key=";
 		const string strurlSouGou = "http://pic.sogou.com/pics?ie=utf8&p=40230504&interV=kKIOkrELjboMmLkEk7oTkKIMkbELjbgQmLkElbcTkKILmrELjboLmLkEkr4TkKIRmLkEk78TkKILkbELjboN_1861238217&query=";
 		const string strurl360 = "http://image.so.com/i?ie=utf-8&q=";
+		const string strurlDDG = "http://duckduckgo.com/?iax=1&ia=images&q=";
 		       
 		private delegate void TempDelegate(Image image);
 		private delegate void ChangeControlEnable(Button bt);
@@ -50,58 +49,25 @@ namespace Mp3AlbumCoverUpdater
 
 		private void btnStart_Click(object sender, EventArgs e)
 		{
-			btnStart.Text = "Label1";            
+			btnStart.Text = "Searching...";            
 			btnStart.Enabled = false;       
 			
 			string strurl = "";         
 			
-			switch (cobEngine.Text) {
-				case"BaiDu":
-					strurl = strurlBaidu + txtKeyWord.Text;
-					strEngine = cobEngine.Text;
-					SourceCode += GetWebClient(strurl);
-					break;
-				case"QQ":
-					strurl = strurlQQ.Replace("Key", System.Web.HttpUtility.UrlEncode(txtKeyWord.Text, System.Text.Encoding.GetEncoding("UTF-8")));
-					strEngine = cobEngine.Text;
-					SourceCode = GetWebClient(strurl);
-					SourceCode = CreateImageUrl(SourceCode);
-					break;
-				case"Google":
-					strurl = strurlGoogle + txtKeyWord.Text;
-					strEngine = cobEngine.Text;
-					SourceCode = GetWebClient(strurl);
-					break;
-				case"163":
-					strEngine = cobEngine.Text;
-					SourceCode = PostData("http://music.163.com/api/search/get/web?csrf_token=", "hlpretag=%3Cspan%20class%3D%22s-fc7%22%3E&hlposttag=%3C%2Fspan%3E&s=" + GuessAlbumNameBy163(txtKeyWord.Text) + "&_page=search&type=10&offset=0&total=true&limit=75", "http://music.163.com");
-					break;
-				case "XiaMi":
-					strurl = strurlXiaMi + txtKeyWord.Text;
-					strEngine = cobEngine.Text;
-					SourceCode = GetWebClient(strurl);
-					break;
-				case "SouGou":
-					strurl = strurlSouGou + txtKeyWord.Text;
-					strEngine = cobEngine.Text;
-					SourceCode = GetWebClient(strurl);
-					break;
-				case "360":
-					strurl = strurl360 + txtKeyWord.Text;
-					strEngine = cobEngine.Text;
-					SourceCode = GetWebClient(strurl);
-					break;
-				default:
-					break;
-			}
-            
+			strurl = strurlDDG + txtKeyWord.Text;
+			Logger.Log("strurl : " + strurl);
+			strEngine = cobEngine.Text;
+			Logger.Log("strEngine : " + strEngine);
+			string html = GetHtml(strurl);            
             
 			flpPicture.Controls.Clear();
-			httpList = GetHyperLinks(SourceCode);
+			httpList = GetHyperLinks(html);
 			iThread = 10;
 			int iSum = httpList.Count;
 			int iAve = iSum / iThread;
 			int iMod = iSum % iThread;
+			
+			Logger.Log("httpList.Count : " + httpList.Count);
 
 			try {
                 
@@ -142,8 +108,8 @@ namespace Mp3AlbumCoverUpdater
 				//mainAutoResetEvent.WaitOne();
                
 				this.Cursor = Cursors.WaitCursor;
-			} catch (Exception) {
-				throw;
+			} catch (Exception ex) {
+				Logger.Error("error while toto : " + ex);
 			} finally {
 				this.Cursor = Cursors.Default;
 			}
@@ -151,7 +117,7 @@ namespace Mp3AlbumCoverUpdater
 
 		private void ChangeButtonEnable(Button bt)
 		{
-			bt.Text = "Label2";
+			bt.Text = "Search";
 			bt.Enabled = true;
 		}
 
@@ -164,18 +130,16 @@ namespace Mp3AlbumCoverUpdater
 				try {
 					image = GetUrlImage(httpList[ti.iStart + i].ToString());
 					flpPicture.Invoke(new TempDelegate(AddPictureBox), new object[] { image });
-				} catch (Exception) {
-                    
-					throw;
-				}
-                
-                
+				} catch (Exception ex) {
+					Logger.Error("error while toto : " + ex);
+				}	                    
 			}
         
 		}
 
 		private void AddPictureBox(Image image)
 		{
+			Logger.Title("AddPictureBox");
 			if (image != null) {
 				var picbox = new PictureBox();
 				picbox.Size = new Size(100, 100);
@@ -183,6 +147,8 @@ namespace Mp3AlbumCoverUpdater
 				picbox.SizeMode = PictureBoxSizeMode.StretchImage;
 				picbox.Image = image;
 				flpPicture.Controls.Add(picbox);
+			} else {
+				Logger.Error("cannot display null image");
 			}
 		}
 
@@ -207,73 +173,49 @@ namespace Mp3AlbumCoverUpdater
 				flpPicture.AutoScrollPosition = new Point(0, flpPicture.VerticalScroll.Value - e.Delta / 20);
         
 		}
-		private string GetWebClient(string url)
+		private string GetHtml(string url)
 		{
-			try {
-				string strHTML = "";
+			Logger.Title("GetHyperLinks");
+			Logger.Log("url : " + url);
+			
+			string strHTML = "";
+			try {				
 				Stream myStream = myWebClient.OpenRead(url);
-				var sr = new StreamReader(myStream, System.Text.Encoding.GetEncoding("gb2312"));
+				var sr = new StreamReader(myStream);
 				strHTML = sr.ReadToEnd();
-				strHTML = strHTML.Replace("\\", "");
-                
+				strHTML = strHTML.Replace("\\", "");                
+				Logger.Log("strHTML : " + strHTML);
 				myStream.Close();
-				return strHTML;
+				
 			} catch (Exception ex) {
-
-				MessageBox.Show(ex.Message);
-				return "";
+				Logger.Error("error while getting html from url : " + ex);
 			}
-           
-		}
-
-		private string CreateImageUrl(string Source)
-		{
-			var al = new ArrayList();
-			string strImageUrl = "";
-			const string strRegex = @"albumMID.*?,";
-			var r = new Regex(strRegex, RegexOptions.IgnoreCase);
-			var m = r.Matches(Source);
-			for (int i = 0; i < m.Count; i++) {
-				strImageUrl += "http://imgcache.qq.com/music/photo/mid_album_500/" + m[i].ToString().Substring(22, 1) + "/" + m[i].ToString().Substring(23, 1) + "/" + m[i].ToString().Substring(10, 14) + ".jpg   ";
-			}
-			return strImageUrl;
+			return strHTML;
 		}
 
 		private ArrayList GetHyperLinks(string htmlCode)
 		{
-			var al = new ArrayList();
-
+			Logger.Title("GetHyperLinks");
+			
+			var links = new ArrayList();
 			const string strRegex = @"http:\/\/.[^""]*?\.jpg";           
 			var r = new Regex(strRegex, RegexOptions.IgnoreCase);
 			var m = r.Matches(htmlCode);
-
-			for (int i = 0; i <= m.Count - 1; i++) {
-				bool rep = false;
-				string strNew = m[i].ToString();
-				foreach (string str in al) {
-					if (strEngine == "163" || strEngine == "BaiDu") {
-						if (strNew.Substring(10, 38) == str.Substring(10, 38) || strNew.Contains("fm=21&gp")) {
-							rep = true;
-							break;
-						}
-					} else if (strEngine == "SouGou" || strEngine == "360") {
-						if (strNew.Contains("sogou.com") || strNew.Contains("so.qhimg.com")) {
-							rep = true;
-							break;
-						}
-					}
-				}
-				if (strEngine == "XiaMi") {
-					strNew = strNew.Replace("_1", "_4");
-				}
-				if (!rep)
-					al.Add(strNew);
+			
+			string link;
+			for (int i = 0; i < m.Count; i++) {
+				link = m[i].ToString();
+				Logger.Log("link found : " + link);
+				links.Add(link);
 			}           
-			return al;
+			return links;
 		}
 
 		private Image GetUrlImage(string strurl)
 		{
+			Logger.Title("GetUrlImage");
+			Logger.Log("strurl : " + strurl);
+			
 			var request = (HttpWebRequest)WebRequest.Create(strurl);
 			request.Method = "GET";
 			string strReferer = "";
@@ -281,14 +223,8 @@ namespace Mp3AlbumCoverUpdater
 				case "BaiDu":
 					strReferer = "http://www.baidu.com";
 					break;
-				case "QQ":
-					strReferer = "http://y.qq.com/";
-					break;
 				case "Google":
-					strReferer = "http://www.google.hk";
-					break;
-				case "163":
-					strReferer = "http://music.163.com/";
+					strReferer = "http://www.google.com";
 					break;
 				case "XiaMi":
 					strReferer = "http://www.xiami.com/";
@@ -300,31 +236,31 @@ namespace Mp3AlbumCoverUpdater
 					strReferer = "http://www.so.com/";
 					break;
 				default:
+					Logger.Error("error setting referer for engine : " + strEngine);				
 					break;
 			}
+			
+			Logger.Log("strReferer : " + strReferer);
 			request.Referer = strReferer;
 			request.ContentType = "application/x-www-form-urlencoded";
 			Image image;
 			Stream myStream;
 			try {
 				var response = (HttpWebResponse)request.GetResponse();
-
 				myStream = response.GetResponseStream();
-
 				image = Image.FromStream(myStream); 
 				myStream.Close();
-			} catch (Exception) {
+			} catch (Exception ex) {
+				Logger.Error("error while getting image from url : " + ex);				
 				listError.Add(strurl);
 				image = null;
 			}          
-            
-           
 			return image;
 		}
 
 		private void Form1_Load(object sender, EventArgs e)
 		{           
-			cobEngine.Text = "QQ";
+			cobEngine.Text = "Google";
 			this.MouseWheel += new MouseEventHandler(Form1_MouseWheel);
 
 		}
@@ -348,13 +284,9 @@ namespace Mp3AlbumCoverUpdater
 					if (frm.ShowDialog() == DialogResult.OK) {
 						dgvList.DataSource = dtResult;
 					}
-				} catch (Exception) {
-					throw;
-				} finally {
-                   
-				}
-              
-               
+				} catch (Exception ex) {
+					Logger.Error("error while toto : " + ex);
+				}                           
 			}
            
 		}
@@ -362,9 +294,9 @@ namespace Mp3AlbumCoverUpdater
 		private void GetFiles(object sender, EventArgs e)
 		{
 			var dt = new DataTable();
-			var dc1 = new DataColumn("±êÌâ", typeof(string));
-			var dc2 = new DataColumn("Â·¾¶", typeof(string));
-			var dc3 = new DataColumn("×¨¼­·âÃæ", typeof(Image));
+			var dc1 = new DataColumn("ï¿½ï¿½ï¿½ï¿½", typeof(string));
+			var dc2 = new DataColumn("Â·ï¿½ï¿½", typeof(string));
+			var dc3 = new DataColumn("×¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½", typeof(Image));
            
 			dt.Columns.Add(dc1);
 			dt.Columns.Add(dc2);
@@ -375,15 +307,15 @@ namespace Mp3AlbumCoverUpdater
 			try {
 				foreach (FileInfo fi in files1) {
 					DataRow dr = dt.NewRow();
-					dr["±êÌâ"] = fi.Name;
-					dr["Â·¾¶"] = fi.FullName;
+					dr["ï¿½ï¿½ï¿½ï¿½"] = fi.Name;
+					dr["Â·ï¿½ï¿½"] = fi.FullName;
 					strTitel = fi.Name;
 					Mp3File = new Mp3File(fi.FullName);
-					dr["×¨¼­·âÃæ"] = Mp3File.TagHandler.Picture;
+					dr["×¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"] = Mp3File.TagHandler.Picture;
 					dt.Rows.Add(dr.ItemArray);
 				}
 			} catch (Exception ex) {
-				MessageBox.Show(strTitel + " " + ex.Message);
+				Logger.Error("error while processing  " + strTitel + " : " + ex);
 			} finally {
 				dtResult = dt;
 			}           
@@ -396,17 +328,16 @@ namespace Mp3AlbumCoverUpdater
 				return;
 
 			try {
-				Mp3File = new Mp3File(dgvList.SelectedRows[0].Cells["Â·¾¶"].Value.ToString());
+				Mp3File = new Mp3File(dgvList.SelectedRows[0].Cells["Â·ï¿½ï¿½"].Value.ToString());
                
-				var mp3fileinfo = new Mp3FileInfo(dgvList.SelectedRows[0].Cells["Â·¾¶"].Value.ToString());
+				var mp3fileinfo = new Mp3FileInfo(dgvList.SelectedRows[0].Cells["Â·ï¿½ï¿½"].Value.ToString());
 				txtKeyWord.Text = mp3fileinfo.Title.Trim() + " " + mp3fileinfo.Artist.Trim();
 				ptpOld.Image = mp3fileinfo.AlbumCover;
 
 			} catch (Exception ex) {
-				MessageBox.Show(ex.Message);
+				Logger.Error("error while toto : " + ex);
 				ptpOld.Image = null;
 			}
-
 		}
        
 
@@ -462,37 +393,5 @@ namespace Mp3AlbumCoverUpdater
 			responseStream.Close();
 			return retString;
 		}
-
-		private string GuessAlbumNameByQQ(string KeyWord)
-		{
-			string strTemp = GetWebClient("http://soso.music.qq.com/fcgi-bin/multiple_music_search.fcg?mid=1&p=1&catZhida=1&lossless=0&t=100&searchid=40993740618700273&remoteplace=txt.yqqlist.all&utf8=1&w=" + System.Web.HttpUtility.UrlEncode(KeyWord, System.Text.Encoding.GetEncoding("UTF-8")));
-			const string strRegex = "<a class=\"data\" style=\"display:none;\">.*?</a>";
-			var r = new Regex(strRegex, RegexOptions.IgnoreCase);
-			MatchCollection m = r.Matches(strTemp);
-			string[] strTemps = m[0].ToString().Split(new char[] { '|' });
-			if (strTemps.Length > 6) {
-				return strTemps[5].ToString();
-			} else {
-				return "";
-			}
-
-		}
-
-		private string GuessAlbumNameBy163(string KeyWord)
-		{
-			string strTemp = PostData("http://music.163.com/api/search/get/web?csrf_token=", "hlpretag=%3Cspan%20class%3D%22s-fc7%22%3E&hlposttag=%3C%2Fspan%3E&s=Key&_page=search&type=1&offset=0&total=true&limit=30".Replace("Key", System.Web.HttpUtility.UrlEncode(KeyWord, System.Text.Encoding.GetEncoding("UTF-8"))), "http://music.163.com");
-			string strRegex = "artists\".*?artist\"";
-			Regex r = new Regex(strRegex, RegexOptions.IgnoreCase);
-			MatchCollection m = r.Matches(strTemp);
-			string[] strTemps = m[0].ToString().Split(new char[] { '"' });
-
-			if (strTemps.Length > 7) {
-				return strTemps[6].ToString() + " " + strTemps[18].ToString();
-			} else {
-				return "";
-			}
-
-		}
-       
 	}
 }

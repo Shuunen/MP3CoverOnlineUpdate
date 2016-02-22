@@ -28,7 +28,7 @@ namespace Mp3AlbumCoverUpdater
 			Logger.Draw("      |_|                                   |_|                  			 ");
 			Logger.Draw("			 ");
 			
-			// Logger.Draw parameters
+			// log parameters
 			Logger.Title("Variables");
 			Logger.Log("thisExe : " + thisExe); // 
 			Logger.Log("thisFolder : " + thisFolder); // 
@@ -44,14 +44,8 @@ namespace Mp3AlbumCoverUpdater
 			Application.SetCompatibleTextRenderingDefault(false);
 			Application.Run(new frmMp3Album());
 			
-			// close Logger.Draw
-			Logger.Close("mp3-cover-online-update end");
-	
-		}	
-		
-		static string RemoveSpecialCharacters(string str)
-		{
-			return Regex.Replace(str, "[^a-zA-Z0-9_.]+", "", RegexOptions.Compiled);
+			// close log
+			// Logger.Close("mp3-cover-online-update end");	
 		}
 	}
 }

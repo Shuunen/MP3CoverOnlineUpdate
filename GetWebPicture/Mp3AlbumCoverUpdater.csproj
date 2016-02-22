@@ -80,7 +80,6 @@
     <Compile Include="frmMp3Album.Designer.cs">
       <DependentUpon>frmMp3Album.cs</DependentUpon>
     </Compile>
-    <Compile Include="FinalHtml.cs" />
     <Compile Include="frmWaitingBox.cs">
       <SubType>Form</SubType>
     </Compile>

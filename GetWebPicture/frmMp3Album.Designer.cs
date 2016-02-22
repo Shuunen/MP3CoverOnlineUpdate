@@ -142,13 +142,12 @@
 			this.cobEngine.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.cobEngine.FormattingEnabled = true;
 			this.cobEngine.Items.AddRange(new object[] {
-				"QQ",
 				"XiaMi",
-				"163",
 				"BaiDu",
 				"SouGou",
 				"360",
-				"Google"
+				"Google",
+				"DuckDuckGo"
 			});
 			this.cobEngine.Location = new System.Drawing.Point(353, 27);
 			this.cobEngine.Name = "cobEngine";
