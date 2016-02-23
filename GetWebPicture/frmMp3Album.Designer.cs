@@ -30,7 +30,7 @@
 			this.btnStart = new System.Windows.Forms.Button();
 			this.txtKeyWord = new System.Windows.Forms.TextBox();
 			this.ptbNew = new System.Windows.Forms.PictureBox();
-			this.btnAoutUpdate = new System.Windows.Forms.Button();
+			this.btnAutoUpdate = new System.Windows.Forms.Button();
 			this.btnUpdate = new System.Windows.Forms.Button();
 			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
 			this.OpenFile = new System.Windows.Forms.ToolStripMenuItem();
@@ -73,15 +73,15 @@
 			this.ptbNew.TabStop = false;
 			this.ptbNew.DoubleClick += new System.EventHandler(this.ptbNew_DoubleClick);
 			// 
-			// btnAoutUpdate
+			// btnAutoUpdate
 			// 
-			this.btnAoutUpdate.Location = new System.Drawing.Point(737, 524);
-			this.btnAoutUpdate.Name = "btnAoutUpdate";
-			this.btnAoutUpdate.Size = new System.Drawing.Size(75, 23);
-			this.btnAoutUpdate.TabIndex = 6;
-			this.btnAoutUpdate.Text = "Auto update";
-			this.btnAoutUpdate.UseVisualStyleBackColor = true;
-			this.btnAoutUpdate.Click += new System.EventHandler(this.btnAoutUpdate_Click);
+			this.btnAutoUpdate.Location = new System.Drawing.Point(737, 524);
+			this.btnAutoUpdate.Name = "btnAutoUpdate";
+			this.btnAutoUpdate.Size = new System.Drawing.Size(75, 23);
+			this.btnAutoUpdate.TabIndex = 6;
+			this.btnAutoUpdate.Text = "Auto update";
+			this.btnAutoUpdate.UseVisualStyleBackColor = true;
+			this.btnAutoUpdate.Click += new System.EventHandler(this.btnAutoUpdate_Click);
 			// 
 			// btnUpdate
 			// 
@@ -141,14 +141,10 @@
 			// 
 			this.cobEngine.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.cobEngine.FormattingEnabled = true;
-			this.cobEngine.Items.AddRange(new object[] {
-				"XiaMi",
-				"BaiDu",
-				"SouGou",
-				"360",
-				"Google",
-				"DuckDuckGo"
-			});
+			foreach (var provider in Program.Providers) {
+				this.cobEngine.Items.AddRange(new object[] { provider.ID });
+			}
+			
 			this.cobEngine.Location = new System.Drawing.Point(353, 27);
 			this.cobEngine.Name = "cobEngine";
 			this.cobEngine.Size = new System.Drawing.Size(64, 20);
@@ -182,7 +178,7 @@
 			this.Controls.Add(this.cobEngine);
 			this.Controls.Add(this.dgvList);
 			this.Controls.Add(this.btnUpdate);
-			this.Controls.Add(this.btnAoutUpdate);
+			this.Controls.Add(this.btnAutoUpdate);
 			this.Controls.Add(this.ptpOld);
 			this.Controls.Add(this.ptbNew);
 			this.Controls.Add(this.txtKeyWord);
@@ -208,7 +204,7 @@
 		private System.Windows.Forms.Button btnStart;
 		private System.Windows.Forms.TextBox txtKeyWord;
 		private System.Windows.Forms.PictureBox ptbNew;
-		private System.Windows.Forms.Button btnAoutUpdate;
+		private System.Windows.Forms.Button btnAutoUpdate;
 		private System.Windows.Forms.Button btnUpdate;
 		private System.Windows.Forms.MenuStrip menuStrip1;
 		private System.Windows.Forms.ToolStripMenuItem OpenFile;

@@ -22,22 +22,15 @@ namespace Mp3AlbumCoverUpdater
 			InitializeComponent();
 		}
 
-		WebClient myWebClient = new WebClient();		
-		ArrayList httpList;
+		WebClient myWebClient = new WebClient();
+		ArrayList imgUrls;
 		int iThread;
 		Mp3File Mp3File = null;
-		private string strSelectPaht = "";
-		private DataTable dtResult = null;
-		private List<string> listError = new List<string>();
-		private string strEngine = "";
-		
-		const string strurlBaidu = "http://image.baidu.com/i?tn=baiduimage&ipn=r&ct=201326592&cl=2&lm=-1&st=-1&fm=result&fr=&sf=1&fmq=&pv=&ic=0&nc=1&z=&se=1&showtab=0&fb=0&width=&height=&face=0&istype=2&ie=utf-8&word=";
-		const string strurlGoogle = "http://www.google.com/search?newwindow=1&safe=strict&biw=1366&bih=654&site=imghp&tbm=isch&sa=1&q=";
-		const string strurlXiaMi = "http://www.xiami.com/search?spm=a1z1s.3521873.23310045.1.AKUtUf&key=";
-		const string strurlSouGou = "http://pic.sogou.com/pics?ie=utf8&p=40230504&interV=kKIOkrELjboMmLkEk7oTkKIMkbELjbgQmLkElbcTkKILmrELjboLmLkEkr4TkKIRmLkEk78TkKILkbELjboN_1861238217&query=";
-		const string strurl360 = "http://image.so.com/i?ie=utf-8&q=";
-		const string strurlDDG = "http://duckduckgo.com/?iax=1&ia=images&q=";
-		       
+		string selectedPath = "";
+		DataTable dtResult = null;
+		List<string> listError = new List<string>();
+		Provider selectedProvider;
+				       
 		private delegate void TempDelegate(Image image);
 		private delegate void ChangeControlEnable(Button bt);
 
@@ -47,27 +40,27 @@ namespace Mp3AlbumCoverUpdater
 			public int iEnd { get; set; }
 		}
 
-		private void btnStart_Click(object sender, EventArgs e)
+		void btnStart_Click(object sender, EventArgs e)
 		{
 			btnStart.Text = "Searching...";            
 			btnStart.Enabled = false;       
+									
+			foreach (var provider in Program.Providers) {
+				if(provider.ID == cobEngine.Text){
+					selectedProvider = provider;
+				}
+			}
+			string searchUrl =  selectedProvider.Url + txtKeyWord.Text;
+			Logger.Log("searchUrl : " + searchUrl);
+			imgUrls = GetHyperLinks( GetHtml(searchUrl));
 			
-			string strurl = "";         
-			
-			strurl = strurlDDG + txtKeyWord.Text;
-			Logger.Log("strurl : " + strurl);
-			strEngine = cobEngine.Text;
-			Logger.Log("strEngine : " + strEngine);
-			string html = GetHtml(strurl);            
-            
 			flpPicture.Controls.Clear();
-			httpList = GetHyperLinks(html);
 			iThread = 10;
-			int iSum = httpList.Count;
+			int iSum = imgUrls.Count;
 			int iAve = iSum / iThread;
 			int iMod = iSum % iThread;
 			
-			Logger.Log("httpList.Count : " + httpList.Count);
+			Logger.Log("imgUrls.Count : " + imgUrls.Count);
 
 			try {
                 
@@ -89,7 +82,7 @@ namespace Mp3AlbumCoverUpdater
 					ThreadPool.QueueUserWorkItem(new WaitCallback(Mp3AlbumCoverUpdaterToForm), ti);
 
 				}
-				//AutoResetEvent mainAutoResetEvent = new AutoResetEvent(false);
+				
 				RegisteredWaitHandle registeredWaitHandle = null;
 				registeredWaitHandle = ThreadPool.RegisterWaitForSingleObject(new AutoResetEvent(false), new WaitOrTimerCallback(delegate(object obj, bool timeout) {
 					int workerThreads = 0;
@@ -98,46 +91,45 @@ namespace Mp3AlbumCoverUpdater
 					ThreadPool.GetAvailableThreads(out workerThreads, out compleThreads);
 					ThreadPool.GetMaxThreads(out maxWordThreads, out compleThreads);                   
 					if (workerThreads == maxWordThreads) {
-                      
-						//mainAutoResetEvent.Set();
 						registeredWaitHandle.Unregister(null);
 						btnStart.Invoke(new ChangeControlEnable(ChangeButtonEnable), new object[] { btnStart });
-
 					}
 				}), null, 1000, false);
-				//mainAutoResetEvent.WaitOne();
-               
-				this.Cursor = Cursors.WaitCursor;
+				
+				Cursor = Cursors.WaitCursor;
 			} catch (Exception ex) {
-				Logger.Error("error while toto : " + ex);
+				Logger.Error("error while searching covers : " + ex);
 			} finally {
-				this.Cursor = Cursors.Default;
+				Cursor = Cursors.Default;
 			}
 		}
 
-		private void ChangeButtonEnable(Button bt)
+		void ChangeButtonEnable(Button bt)
 		{
 			bt.Text = "Search";
 			bt.Enabled = true;
 		}
 
-		private void Mp3AlbumCoverUpdaterToForm(Object threadinfo)
+		void Mp3AlbumCoverUpdaterToForm(Object threadinfo)
 		{
+			Logger.Log("Mp3AlbumCoverUpdaterToForm");
 			var ti = (ThreadInfo)threadinfo;
-            
+			string url;
 			for (int i = 0; i < ti.iEnd - ti.iStart + 1; i++) {
 				Image image = null;
 				try {
-					image = GetUrlImage(httpList[ti.iStart + i].ToString());
+					url = imgUrls[ti.iStart + i].ToString();
+					Logger.Log("getting url : " + url);
+					image = GetUrlImage(url);
 					flpPicture.Invoke(new TempDelegate(AddPictureBox), new object[] { image });
 				} catch (Exception ex) {
-					Logger.Error("error while toto : " + ex);
+					Logger.Error("error while cover display : " + ex);
 				}	                    
 			}
         
 		}
 
-		private void AddPictureBox(Image image)
+		void AddPictureBox(Image image)
 		{
 			Logger.Title("AddPictureBox");
 			if (image != null) {
@@ -162,38 +154,30 @@ namespace Mp3AlbumCoverUpdater
 			label1.Text = picbox.Image.Size.ToString();
 		}
 
-		void Form1_MouseWheel(object sender, MouseEventArgs e)
-		{
-			var aPoint = new Point(e.X, e.Y);
-			aPoint.Offset(this.Location.X, this.Location.Y);
-			var aRec1 = new Rectangle(flpPicture.Location.X, flpPicture.Location.Y, flpPicture.Width, flpPicture.Height);
-          
-
-			if (RectangleToScreen(aRec1).Contains(aPoint))
-				flpPicture.AutoScrollPosition = new Point(0, flpPicture.VerticalScroll.Value - e.Delta / 20);
-        
-		}
-		private string GetHtml(string url)
+		
+		string GetHtml(string url)
 		{
 			Logger.Title("GetHyperLinks");
 			Logger.Log("url : " + url);
 			
-			string strHTML = "";
+			string html = "";
 			try {				
 				Stream myStream = myWebClient.OpenRead(url);
 				var sr = new StreamReader(myStream);
-				strHTML = sr.ReadToEnd();
-				strHTML = strHTML.Replace("\\", "");                
-				Logger.Log("strHTML : " + strHTML);
+				html = sr.ReadToEnd();
+				html = html.Replace("\\", "");
+				html = string.Join(" ", Regex.Split(html, @"(?:\r\n|\n|\r)"));
+				html = Regex.Replace(html, @"\s+", " ");
+				Logger.Log("html : " + html);
 				myStream.Close();
 				
 			} catch (Exception ex) {
 				Logger.Error("error while getting html from url : " + ex);
 			}
-			return strHTML;
+			return html;
 		}
 
-		private ArrayList GetHyperLinks(string htmlCode)
+		ArrayList GetHyperLinks(string htmlCode)
 		{
 			Logger.Title("GetHyperLinks");
 			
@@ -211,37 +195,15 @@ namespace Mp3AlbumCoverUpdater
 			return links;
 		}
 
-		private Image GetUrlImage(string strurl)
+		Image GetUrlImage(string url)
 		{
 			Logger.Title("GetUrlImage");
-			Logger.Log("strurl : " + strurl);
+			Logger.Log("url : " + url);
 			
-			var request = (HttpWebRequest)WebRequest.Create(strurl);
-			request.Method = "GET";
-			string strReferer = "";
-			switch (strEngine) {
-				case "BaiDu":
-					strReferer = "http://www.baidu.com";
-					break;
-				case "Google":
-					strReferer = "http://www.google.com";
-					break;
-				case "XiaMi":
-					strReferer = "http://www.xiami.com/";
-					break;
-				case "SouGou":
-					strReferer = "http://www.sogou.com/";
-					break;
-				case "360":
-					strReferer = "http://www.so.com/";
-					break;
-				default:
-					Logger.Error("error setting referer for engine : " + strEngine);				
-					break;
-			}
-			
-			Logger.Log("strReferer : " + strReferer);
-			request.Referer = strReferer;
+			var request = (HttpWebRequest)WebRequest.Create(url);
+			request.Method = "GET";	
+			Logger.Log("referer : " + selectedProvider.Referer);
+			request.Referer = selectedProvider.Referer;
 			request.ContentType = "application/x-www-form-urlencoded";
 			Image image;
 			Stream myStream;
@@ -252,34 +214,49 @@ namespace Mp3AlbumCoverUpdater
 				myStream.Close();
 			} catch (Exception ex) {
 				Logger.Error("error while getting image from url : " + ex);				
-				listError.Add(strurl);
+				listError.Add(url);
 				image = null;
 			}          
 			return image;
 		}
 
-		private void Form1_Load(object sender, EventArgs e)
+		void Form1_Load(object sender, EventArgs e)
 		{           
-			cobEngine.Text = "Google";
+			Logger.Title("GUI Load");
+			string defaultProvider = Program.Providers[0].ID;
+			Logger.Log("set default provider to : " + defaultProvider);
+			cobEngine.Text = defaultProvider;
 			this.MouseWheel += new MouseEventHandler(Form1_MouseWheel);
+		}
+		
+		void Form1_MouseWheel(object sender, MouseEventArgs e)
+		{
+			var aPoint = new Point(e.X, e.Y);
+			aPoint.Offset(this.Location.X, this.Location.Y);
+			var aRec1 = new Rectangle(flpPicture.Location.X, flpPicture.Location.Y, flpPicture.Width, flpPicture.Height);
+          
 
+			if (RectangleToScreen(aRec1).Contains(aPoint)) {
+				flpPicture.AutoScrollPosition = new Point(0, flpPicture.VerticalScroll.Value - e.Delta / 20);
+			}
+        
 		}
 
-		private void btnUpdate_Click(object sender, EventArgs e)
+		void btnUpdate_Click(object sender, EventArgs e)
 		{
 			Mp3File.TagHandler.Picture = ptbNew.Image;
 			Mp3File.Update();
 			dgvList.SelectedRows[0].Cells[2].Value = ptbNew.Image;
 		}
 
-		private void OpenFile_Click(object sender, EventArgs e)
+		void OpenFile_Click(object sender, EventArgs e)
 		{
 			var fbd = new FolderBrowserDialog();
 			if (fbd.ShowDialog() == DialogResult.OK) {
                 
                
 				try {
-					strSelectPaht = fbd.SelectedPath;
+					selectedPath = fbd.SelectedPath;
 					var frm = new frmWaitingBox(new EventHandler<EventArgs>(GetFiles), 30 * 60 * 1000, "", false, true);
 					if (frm.ShowDialog() == DialogResult.OK) {
 						dgvList.DataSource = dtResult;
@@ -291,46 +268,46 @@ namespace Mp3AlbumCoverUpdater
            
 		}
 
-		private void GetFiles(object sender, EventArgs e)
+		void GetFiles(object sender, EventArgs e)
 		{
 			var dt = new DataTable();
-			var dc1 = new DataColumn("����", typeof(string));
-			var dc2 = new DataColumn("·��", typeof(string));
-			var dc3 = new DataColumn("ר������", typeof(Image));
+			var dc1 = new DataColumn("Filename", typeof(string));
+			var dc2 = new DataColumn("Path", typeof(string));
+			var dc3 = new DataColumn("Cover", typeof(Image));
            
 			dt.Columns.Add(dc1);
 			dt.Columns.Add(dc2);
 			dt.Columns.Add(dc3);
-			var di = new DirectoryInfo(strSelectPaht);
+			var di = new DirectoryInfo(selectedPath);
 			FileInfo[] files1 = di.GetFiles("*.mp3");
-			string strTitel = "";
+			string title = "";
 			try {
 				foreach (FileInfo fi in files1) {
 					DataRow dr = dt.NewRow();
-					dr["����"] = fi.Name;
-					dr["·��"] = fi.FullName;
-					strTitel = fi.Name;
+					dr["Filename"] = fi.Name;
+					dr["Path"] = fi.FullName;
+					title = fi.Name;
 					Mp3File = new Mp3File(fi.FullName);
-					dr["ר������"] = Mp3File.TagHandler.Picture;
+					dr["Cover"] = Mp3File.TagHandler.Picture;
 					dt.Rows.Add(dr.ItemArray);
 				}
 			} catch (Exception ex) {
-				Logger.Error("error while processing  " + strTitel + " : " + ex);
+				Logger.Error("error while processing  " + title + " : " + ex);
 			} finally {
 				dtResult = dt;
 			}           
             
 		}
 
-		private void dgvList_SelectionChanged(object sender, EventArgs e)
+		void dgvList_SelectionChanged(object sender, EventArgs e)
 		{
 			if (dgvList.SelectedRows.Count <= 0)
 				return;
 
 			try {
-				Mp3File = new Mp3File(dgvList.SelectedRows[0].Cells["·��"].Value.ToString());
+				Mp3File = new Mp3File(dgvList.SelectedRows[0].Cells["Path"].Value.ToString());
                
-				var mp3fileinfo = new Mp3FileInfo(dgvList.SelectedRows[0].Cells["·��"].Value.ToString());
+				var mp3fileinfo = new Mp3FileInfo(dgvList.SelectedRows[0].Cells["Path"].Value.ToString());
 				txtKeyWord.Text = mp3fileinfo.Title.Trim() + " " + mp3fileinfo.Artist.Trim();
 				ptpOld.Image = mp3fileinfo.AlbumCover;
 
@@ -341,12 +318,12 @@ namespace Mp3AlbumCoverUpdater
 		}
        
 
-		private void btnAoutUpdate_Click(object sender, EventArgs e)
+		void btnAutoUpdate_Click(object sender, EventArgs e)
 		{
-			MessageBox.Show("... todo :)");
+			MessageBox.Show("btnAutoUpdate... todo :)");
 		}
 
-		private void ptbNew_DoubleClick(object sender, EventArgs e)
+		void ptbNew_DoubleClick(object sender, EventArgs e)
 		{
 			var ofd = new OpenFileDialog();
 			ofd.Filter = "Image|*.jpg;*.jpeg;*.png;*.bmp;*.gif";
@@ -355,20 +332,22 @@ namespace Mp3AlbumCoverUpdater
 			}
 		}
 
-		private void ShowErrorList()
+		void ShowErrorList()
 		{
-			File.WriteAllLines("debug.log", listError.ToArray(), Encoding.Default);
+			foreach (var error in listError){
+				Logger.Error(error);
+			}
 			listError.Clear();
 		}
 
-		private string PostData(string targetUrl, string postDataStr, string refererUrl)
+		string PostData(string targetUrl, string postDataStr, string refererUrl)
 		{
 			var request = (HttpWebRequest)WebRequest.Create(targetUrl);
 			request.CookieContainer = new CookieContainer();
 			var cookie = request.CookieContainer;
 			request.Referer = refererUrl;
 			request.Accept = "*/*";
-			request.Headers["Accept-Language"] = "zh-cn";
+			//request.Headers["Accept-Language"] = "zh-cn";
 			request.UserAgent = "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.1; WOW64; Trident/6.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; .NET4.0C; .NET4.0E)";
 			request.KeepAlive = true;
 			request.ContentType = "application/x-www-form-urlencoded";

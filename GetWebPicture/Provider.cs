@@ -16,20 +16,22 @@ namespace Mp3AlbumCoverUpdater
 	/// </summary>
 	public class Provider
 	{
-		public Provider(string label, string url)
+		public Provider(string label, string url, string referer)
 		{
 			this.ID = this.generateIdFromString(label);
 			this.Label = label;
 			this.Url = url;
+			this.Referer = referer;
 		}
 
 		public string Label { get; set; }
 		public string Url { get; set; }
+		public string Referer { get; set; }
 		public string ID { get; set; }
 		
 		string generateIdFromString(string str)
 		{
-			str = Regex.Replace(str, "[^a-zA-Z]+", "", RegexOptions.Compiled);
+			str = Regex.Replace(str, "[^a-zA-Z0-9]+", "", RegexOptions.Compiled);
 			//Log("pass 1 : " + str);
 			return str;
 		}
