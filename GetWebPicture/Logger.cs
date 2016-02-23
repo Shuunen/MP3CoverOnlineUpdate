@@ -23,7 +23,7 @@ namespace Mp3AlbumCoverUpdater
 		static StreamWriter logInstance;
 		static bool hadError = false;
 		static string logPrefix, logSuffix, logSpaces;
-		const int logMargin = 18;
+		const int logMargin = 24;
 		
 		public static Logger Instance {
 			get {

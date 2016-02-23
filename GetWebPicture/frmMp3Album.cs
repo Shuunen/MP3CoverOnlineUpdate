@@ -24,14 +24,20 @@ namespace Mp3AlbumCoverUpdater
 
 		WebClient myWebClient = new WebClient();
 		ArrayList imgUrls;
-		const int maxThreads = 10;
+		const int maxThreads = 3;
 		const int maxImages = 15;
 		Mp3File Mp3File = null;
 		string selectedPath = "";
 		DataTable dtResult = null;
 		List<string> listError = new List<string>();
 		Provider selectedProvider;
-				       
+		
+		const string regexMultipleSpaces = @"\s+";
+		const string regexPotentialSeparators = @"[_-]+";
+		const string regexUnwantedChars = @"[^a-zA-Z0-9\s]+";
+		const string regexLineReturns = @"(?:\r\n|\n|\r)";
+		const string regexImageUrl = @"http:\/\/.[^""]*?\.jpg";
+		
 		private delegate void TempDelegate(Image image);
 		private delegate void ChangeControlEnable(Button bt);
 
@@ -43,8 +49,7 @@ namespace Mp3AlbumCoverUpdater
 
 		void btnStart_Click(object sender, EventArgs e)
 		{
-			btnStart.Text = "Searching...";            
-			btnStart.Enabled = false;       
+			SetLoadingStatus(true);
 									
 			foreach (var provider in Program.Providers) {
 				if (provider.ID == cobEngine.Text) {
@@ -65,7 +70,17 @@ namespace Mp3AlbumCoverUpdater
 			Logger.Log("urlsPerBatch : " + urlsPerBatch);
 			Logger.Log("urlsRemaining : " + urlsRemaining);
 			
+			// if no url to parse
+			if (urlsCount == 0) {
+				Logger.Log("no covers found");
+				SetLoadingStatus(false);
+				btnStart.Text = "no covers found";
+				return;
+			}
+			
 			try {
+									
+				Cursor = Cursors.WaitCursor;
 				
 				// start threads
 				for (int i = 0; i < maxThreads; i++) {
@@ -99,22 +114,26 @@ namespace Mp3AlbumCoverUpdater
 					ThreadPool.GetMaxThreads(out maxWordThreads, out compleThreads);                   
 					if (workerThreads == maxWordThreads) {
 						registeredWaitHandle.Unregister(null);
-						btnStart.Invoke(new ChangeControlEnable(ChangeButtonEnable), new object[] { btnStart });
+						Logger.Log("thread workers ended !");
+						Cursor = Cursors.Default;
+						SetLoadingStatus(false);
 					}
-				}), null, 1000, false);				
-				Cursor = Cursors.WaitCursor;
+				}), null, 1000, false);			
 				
 			} catch (Exception ex) {
 				Logger.Error("error while searching covers : " + ex);
-			} finally {
-				Cursor = Cursors.Default;
-			}
+			} 
 		}
 
-		void ChangeButtonEnable(Button bt)
+		void SetLoadingStatus(Boolean isLoading)
 		{
-			bt.Text = "Search";
-			bt.Enabled = true;
+			if (isLoading) {
+				btnStart.Text = "Searching...";            
+				btnStart.Enabled = false;       
+			} else {
+				btnStart.Text = "Search";
+				btnStart.Enabled = true;
+			}
 		}
 
 		void Mp3AlbumCoverUpdaterToForm(Object threadinfo)
@@ -173,8 +192,8 @@ namespace Mp3AlbumCoverUpdater
 				var sr = new StreamReader(myStream);
 				html = sr.ReadToEnd();
 				html = html.Replace("\\", "");
-				html = string.Join(" ", Regex.Split(html, @"(?:\r\n|\n|\r)"));
-				html = Regex.Replace(html, @"\s+", " ");
+				html = string.Join(" ", Regex.Split(html, regexLineReturns));
+				html = Regex.Replace(html, regexMultipleSpaces, " ");
 				Logger.Log("html : " + html);
 				myStream.Close();
 				
@@ -188,9 +207,8 @@ namespace Mp3AlbumCoverUpdater
 		{
 			Logger.Title("GetHyperLinks");
 			
-			var links = new ArrayList();
-			const string strRegex = @"http:\/\/.[^""]*?\.jpg";           
-			var r = new Regex(strRegex, RegexOptions.IgnoreCase);
+			var links = new ArrayList();  
+			var r = new Regex(regexImageUrl, RegexOptions.IgnoreCase);
 			var m = r.Matches(htmlCode);
 			
 			string link;
@@ -233,13 +251,14 @@ namespace Mp3AlbumCoverUpdater
 			string defaultProvider = Program.Providers[0].ID;
 			Logger.Log("set default provider to : " + defaultProvider);
 			cobEngine.Text = defaultProvider;
-			this.MouseWheel += new MouseEventHandler(Form1_MouseWheel);
+			MouseWheel += Form1_MouseWheel;
 		}
 		
 		void Form1_MouseWheel(object sender, MouseEventArgs e)
 		{
+			Logger.Log("Form1_MouseWheel");
 			var aPoint = new Point(e.X, e.Y);
-			aPoint.Offset(this.Location.X, this.Location.Y);
+			aPoint.Offset(Location.X, Location.Y);
 			var aRec1 = new Rectangle(flpPicture.Location.X, flpPicture.Location.Y, flpPicture.Width, flpPicture.Height);
           
 
@@ -312,14 +331,23 @@ namespace Mp3AlbumCoverUpdater
 				return;
 
 			try {
-				Mp3File = new Mp3File(dgvList.SelectedRows[0].Cells["Path"].Value.ToString());
-               
-				var mp3fileinfo = new Mp3FileInfo(dgvList.SelectedRows[0].Cells["Path"].Value.ToString());
-				txtKeyWord.Text = mp3fileinfo.Title.Trim() + " " + mp3fileinfo.Artist.Trim();
+				string path = dgvList.SelectedRows[0].Cells["Path"].Value.ToString();
+				Mp3File = new Mp3File(path);
+				var mp3fileinfo = new Mp3FileInfo(path);				
+				string searchText = mp3fileinfo.Title.Trim() + " " + mp3fileinfo.Artist.Trim();
+				searchText = Regex.Replace(searchText, regexPotentialSeparators, " "); // replace potential separators by spaces
+				searchText = Regex.Replace(searchText, regexUnwantedChars, ""); // remove unwanted chars
+				searchText = Regex.Replace(searchText, regexMultipleSpaces, " ");
+				txtKeyWord.Text = searchText;
+				if (btnStart.Enabled) {
+					SetLoadingStatus(false);
+				} else {
+					Logger.Log("TODO : you changed song selection while searching, this should stop search");
+				}
 				ptpOld.Image = mp3fileinfo.AlbumCover;
 
 			} catch (Exception ex) {
-				Logger.Error("error while toto : " + ex);
+				Logger.Error("error while setting searchText & current cover : " + ex);
 				ptpOld.Image = null;
 			}
 		}

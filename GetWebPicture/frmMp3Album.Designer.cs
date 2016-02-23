@@ -2,15 +2,8 @@
 {
 	partial class frmMp3Album
 	{
-		/// <summary>
-		/// 必需的设计器变量。
-		/// </summary>
-		private System.ComponentModel.IContainer components = null;
+		System.ComponentModel.IContainer components = null;
 
-		/// <summary>
-		/// 清理所有正在使用的资源。
-		/// </summary>
-		/// <param name="disposing">如果应释放托管资源，为 true；否则为 false。</param>
 		protected override void Dispose(bool disposing)
 		{
 			if (disposing && (components != null)) {
@@ -19,200 +12,178 @@
 			base.Dispose(disposing);
 		}
 
-		#region Windows 窗体设计器生成的代码
-
-		/// <summary>
-		/// 设计器支持所需的方法 - 不要
-		/// 使用代码编辑器修改此方法的内容。
-		/// </summary>
-		private void InitializeComponent()
+		void InitializeComponent()
 		{
-			this.btnStart = new System.Windows.Forms.Button();
-			this.txtKeyWord = new System.Windows.Forms.TextBox();
-			this.ptbNew = new System.Windows.Forms.PictureBox();
-			this.btnAutoUpdate = new System.Windows.Forms.Button();
-			this.btnUpdate = new System.Windows.Forms.Button();
-			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-			this.OpenFile = new System.Windows.Forms.ToolStripMenuItem();
-			this.ptpOld = new System.Windows.Forms.PictureBox();
-			this.dgvList = new System.Windows.Forms.DataGridView();
-			this.cobEngine = new System.Windows.Forms.ComboBox();
-			this.flpPicture = new System.Windows.Forms.FlowLayoutPanel();
-			this.label1 = new System.Windows.Forms.Label();
-			((System.ComponentModel.ISupportInitialize)(this.ptbNew)).BeginInit();
-			this.menuStrip1.SuspendLayout();
-			((System.ComponentModel.ISupportInitialize)(this.ptpOld)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.dgvList)).BeginInit();
-			this.SuspendLayout();
-			// 
+			btnStart = new System.Windows.Forms.Button();
+			txtKeyWord = new System.Windows.Forms.TextBox();
+			ptbNew = new System.Windows.Forms.PictureBox();
+			btnAutoUpdate = new System.Windows.Forms.Button();
+			btnUpdate = new System.Windows.Forms.Button();
+			menuStrip1 = new System.Windows.Forms.MenuStrip();
+			OpenFile = new System.Windows.Forms.ToolStripMenuItem();
+			ptpOld = new System.Windows.Forms.PictureBox();
+			dgvList = new System.Windows.Forms.DataGridView();
+			cobEngine = new System.Windows.Forms.ComboBox();
+			flpPicture = new System.Windows.Forms.FlowLayoutPanel();
+			label1 = new System.Windows.Forms.Label();
+			((System.ComponentModel.ISupportInitialize)(ptbNew)).BeginInit();
+			menuStrip1.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(ptpOld)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(dgvList)).BeginInit();
+			SuspendLayout();
+			
 			// btnStart
-			// 
-			this.btnStart.Location = new System.Drawing.Point(647, 25);
-			this.btnStart.Name = "btnStart";
-			this.btnStart.Size = new System.Drawing.Size(70, 23);
-			this.btnStart.TabIndex = 0;
-			this.btnStart.Text = "Search";
-			this.btnStart.UseVisualStyleBackColor = true;
-			this.btnStart.Click += new System.EventHandler(this.btnStart_Click);
-			// 
+			btnStart.Location = new System.Drawing.Point(647, 25);
+			btnStart.Name = "btnStart";
+			btnStart.Size = new System.Drawing.Size(70, 23);
+			btnStart.TabIndex = 0;
+			btnStart.Text = "Search";
+			btnStart.UseVisualStyleBackColor = true;
+			btnStart.Click += btnStart_Click;
+			
 			// txtKeyWord
-			// 
-			this.txtKeyWord.Location = new System.Drawing.Point(419, 26);
-			this.txtKeyWord.Name = "txtKeyWord";
-			this.txtKeyWord.Size = new System.Drawing.Size(228, 21);
-			this.txtKeyWord.TabIndex = 2;
-			// 
+			txtKeyWord.Location = new System.Drawing.Point(419, 26);
+			txtKeyWord.Name = "txtKeyWord";
+			txtKeyWord.Size = new System.Drawing.Size(228, 21);
+			txtKeyWord.TabIndex = 2;
+			
 			// ptbNew
-			// 
-			this.ptbNew.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			this.ptbNew.Location = new System.Drawing.Point(723, 281);
-			this.ptbNew.Name = "ptbNew";
-			this.ptbNew.Size = new System.Drawing.Size(240, 240);
-			this.ptbNew.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-			this.ptbNew.TabIndex = 5;
-			this.ptbNew.TabStop = false;
-			this.ptbNew.DoubleClick += new System.EventHandler(this.ptbNew_DoubleClick);
-			// 
+			ptbNew.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+			ptbNew.Location = new System.Drawing.Point(723, 281);
+			ptbNew.Name = "ptbNew";
+			ptbNew.Size = new System.Drawing.Size(240, 240);
+			ptbNew.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+			ptbNew.TabIndex = 5;
+			ptbNew.TabStop = false;
+			ptbNew.DoubleClick += ptbNew_DoubleClick;
+			
 			// btnAutoUpdate
-			// 
-			this.btnAutoUpdate.Location = new System.Drawing.Point(737, 524);
-			this.btnAutoUpdate.Name = "btnAutoUpdate";
-			this.btnAutoUpdate.Size = new System.Drawing.Size(75, 23);
-			this.btnAutoUpdate.TabIndex = 6;
-			this.btnAutoUpdate.Text = "Auto update";
-			this.btnAutoUpdate.UseVisualStyleBackColor = true;
-			this.btnAutoUpdate.Click += new System.EventHandler(this.btnAutoUpdate_Click);
-			// 
+			btnAutoUpdate.Location = new System.Drawing.Point(737, 524);
+			btnAutoUpdate.Name = "btnAutoUpdate";
+			btnAutoUpdate.Size = new System.Drawing.Size(75, 23);
+			btnAutoUpdate.TabIndex = 6;
+			btnAutoUpdate.Text = "Auto update";
+			btnAutoUpdate.UseVisualStyleBackColor = true;
+			btnAutoUpdate.Click += btnAutoUpdate_Click;
+			
 			// btnUpdate
-			// 
-			this.btnUpdate.Location = new System.Drawing.Point(876, 525);
-			this.btnUpdate.Name = "btnUpdate";
-			this.btnUpdate.Size = new System.Drawing.Size(75, 23);
-			this.btnUpdate.TabIndex = 7;
-			this.btnUpdate.Text = "Update";
-			this.btnUpdate.UseVisualStyleBackColor = true;
-			this.btnUpdate.Click += new System.EventHandler(this.btnUpdate_Click);
-			// 
+			btnUpdate.Location = new System.Drawing.Point(876, 525);
+			btnUpdate.Name = "btnUpdate";
+			btnUpdate.Size = new System.Drawing.Size(75, 23);
+			btnUpdate.TabIndex = 7;
+			btnUpdate.Text = "Update";
+			btnUpdate.UseVisualStyleBackColor = true;
+			btnUpdate.Click += btnUpdate_Click;
+			
 			// menuStrip1
-			// 
-			this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-				this.OpenFile
+			menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+				OpenFile
 			});
-			this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-			this.menuStrip1.Name = "menuStrip1";
-			this.menuStrip1.Size = new System.Drawing.Size(975, 24);
-			this.menuStrip1.TabIndex = 8;
-			this.menuStrip1.Text = "menuStrip1";
-			// 
+			menuStrip1.Location = new System.Drawing.Point(0, 0);
+			menuStrip1.Name = "menuStrip1";
+			menuStrip1.Size = new System.Drawing.Size(975, 24);
+			menuStrip1.TabIndex = 8;
+			menuStrip1.Text = "menuStrip1";
+			
 			// OpenFile
-			// 
-			this.OpenFile.Name = "OpenFile";
-			this.OpenFile.Size = new System.Drawing.Size(79, 23);
-			this.OpenFile.Text = "Open folder";
-			this.OpenFile.Click += new System.EventHandler(this.OpenFile_Click);
-			// 
+			OpenFile.Name = "OpenFile";
+			OpenFile.Size = new System.Drawing.Size(79, 23);
+			OpenFile.Text = "Open folder";
+			OpenFile.Click += OpenFile_Click;
+			
 			// ptpOld
-			// 
-			this.ptpOld.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			this.ptpOld.Location = new System.Drawing.Point(723, 27);
-			this.ptpOld.Name = "ptpOld";
-			this.ptpOld.Size = new System.Drawing.Size(240, 240);
-			this.ptpOld.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-			this.ptpOld.TabIndex = 5;
-			this.ptpOld.TabStop = false;
-			// 
+			ptpOld.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+			ptpOld.Location = new System.Drawing.Point(723, 27);
+			ptpOld.Name = "ptpOld";
+			ptpOld.Size = new System.Drawing.Size(240, 240);
+			ptpOld.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+			ptpOld.TabIndex = 5;
+			ptpOld.TabStop = false;
+			
 			// dgvList
-			// 
-			this.dgvList.AllowUserToAddRows = false;
-			this.dgvList.AllowUserToDeleteRows = false;
-			this.dgvList.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-			this.dgvList.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-			this.dgvList.Dock = System.Windows.Forms.DockStyle.Left;
-			this.dgvList.Location = new System.Drawing.Point(0, 24);
-			this.dgvList.Name = "dgvList";
-			this.dgvList.ReadOnly = true;
-			this.dgvList.RowTemplate.Height = 23;
-			this.dgvList.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-			this.dgvList.Size = new System.Drawing.Size(347, 532);
-			this.dgvList.TabIndex = 9;
-			this.dgvList.SelectionChanged += new System.EventHandler(this.dgvList_SelectionChanged);
-			// 
+			dgvList.AllowUserToAddRows = false;
+			dgvList.AllowUserToDeleteRows = false;
+			dgvList.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+			dgvList.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+			dgvList.Dock = System.Windows.Forms.DockStyle.Left;
+			dgvList.Location = new System.Drawing.Point(0, 24);
+			dgvList.Name = "dgvList";
+			dgvList.ReadOnly = true;
+			dgvList.RowTemplate.Height = 23;
+			dgvList.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+			dgvList.Size = new System.Drawing.Size(347, 532);
+			dgvList.TabIndex = 9;
+			dgvList.SelectionChanged += dgvList_SelectionChanged;
+			
 			// cobEngine
-			// 
-			this.cobEngine.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.cobEngine.FormattingEnabled = true;
+			cobEngine.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			cobEngine.FormattingEnabled = true;
 			foreach (var provider in Program.Providers) {
-				this.cobEngine.Items.AddRange(new object[] { provider.ID });
+				cobEngine.Items.AddRange(new object[] { provider.ID });
 			}
 			
-			this.cobEngine.Location = new System.Drawing.Point(353, 27);
-			this.cobEngine.Name = "cobEngine";
-			this.cobEngine.Size = new System.Drawing.Size(64, 20);
-			this.cobEngine.TabIndex = 10;
-			// 
+			cobEngine.Location = new System.Drawing.Point(353, 27);
+			cobEngine.Name = "cobEngine";
+			cobEngine.Size = new System.Drawing.Size(64, 20);
+			cobEngine.TabIndex = 10;
+			
 			// flpPicture
-			// 
-			this.flpPicture.AutoScroll = true;
-			this.flpPicture.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			this.flpPicture.Location = new System.Drawing.Point(353, 50);
-			this.flpPicture.Name = "flpPicture";
-			this.flpPicture.Size = new System.Drawing.Size(364, 506);
-			this.flpPicture.TabIndex = 11;
-			this.flpPicture.TabStop = true;
-			// 
+			flpPicture.AutoScroll = true;
+			flpPicture.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+			flpPicture.Location = new System.Drawing.Point(353, 50);
+			flpPicture.Name = "flpPicture";
+			flpPicture.Size = new System.Drawing.Size(364, 506);
+			flpPicture.TabIndex = 11;
+			flpPicture.TabStop = true;
+			
 			// label1
-			// 
-			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(727, 269);
-			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(0, 12);
-			this.label1.TabIndex = 12;
-			// 
+			label1.AutoSize = true;
+			label1.Location = new System.Drawing.Point(727, 269);
+			label1.Name = "label1";
+			label1.Size = new System.Drawing.Size(0, 12);
+			label1.TabIndex = 12;
+			
 			// frmMp3Album
-			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
-			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(975, 556);
-			this.Controls.Add(this.label1);
-			this.Controls.Add(this.flpPicture);
-			this.Controls.Add(this.cobEngine);
-			this.Controls.Add(this.dgvList);
-			this.Controls.Add(this.btnUpdate);
-			this.Controls.Add(this.btnAutoUpdate);
-			this.Controls.Add(this.ptpOld);
-			this.Controls.Add(this.ptbNew);
-			this.Controls.Add(this.txtKeyWord);
-			this.Controls.Add(this.btnStart);
-			this.Controls.Add(this.menuStrip1);
-			this.MainMenuStrip = this.menuStrip1;
-			this.Name = "frmMp3Album";
-			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-			this.Text = "Mp3 Cover Updater";
-			this.Load += new System.EventHandler(this.Form1_Load);
-			((System.ComponentModel.ISupportInitialize)(this.ptbNew)).EndInit();
-			this.menuStrip1.ResumeLayout(false);
-			this.menuStrip1.PerformLayout();
-			((System.ComponentModel.ISupportInitialize)(this.ptpOld)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.dgvList)).EndInit();
-			this.ResumeLayout(false);
-			this.PerformLayout();
-
+			AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+			AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			ClientSize = new System.Drawing.Size(975, 556);
+			Controls.Add(label1);
+			Controls.Add(flpPicture);
+			Controls.Add(cobEngine);
+			Controls.Add(dgvList);
+			Controls.Add(btnUpdate);
+			Controls.Add(btnAutoUpdate);
+			Controls.Add(ptpOld);
+			Controls.Add(ptbNew);
+			Controls.Add(txtKeyWord);
+			Controls.Add(btnStart);
+			Controls.Add(menuStrip1);
+			MainMenuStrip = menuStrip1;
+			Name = "frmMp3Album";
+			StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+			Text = "Mp3 Cover Updater";
+			Load += new System.EventHandler(Form1_Load);
+			((System.ComponentModel.ISupportInitialize)(ptbNew)).EndInit();
+			menuStrip1.ResumeLayout(false);
+			menuStrip1.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(ptpOld)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(dgvList)).EndInit();
+			ResumeLayout(false);
+			PerformLayout();
 		}
 
-		#endregion
-
-		private System.Windows.Forms.Button btnStart;
-		private System.Windows.Forms.TextBox txtKeyWord;
-		private System.Windows.Forms.PictureBox ptbNew;
-		private System.Windows.Forms.Button btnAutoUpdate;
-		private System.Windows.Forms.Button btnUpdate;
-		private System.Windows.Forms.MenuStrip menuStrip1;
-		private System.Windows.Forms.ToolStripMenuItem OpenFile;
-		private System.Windows.Forms.PictureBox ptpOld;
-		private System.Windows.Forms.DataGridView dgvList;
-		private System.Windows.Forms.ComboBox cobEngine;
-		private System.Windows.Forms.FlowLayoutPanel flpPicture;
-		private System.Windows.Forms.Label label1;
+		System.Windows.Forms.Button btnStart;
+		System.Windows.Forms.TextBox txtKeyWord;
+		System.Windows.Forms.PictureBox ptbNew;
+		System.Windows.Forms.Button btnAutoUpdate;
+		System.Windows.Forms.Button btnUpdate;
+		System.Windows.Forms.MenuStrip menuStrip1;
+		System.Windows.Forms.ToolStripMenuItem OpenFile;
+		System.Windows.Forms.PictureBox ptpOld;
+		System.Windows.Forms.DataGridView dgvList;
+		System.Windows.Forms.ComboBox cobEngine;
+		System.Windows.Forms.FlowLayoutPanel flpPicture;
+		System.Windows.Forms.Label label1;
 	}
 }
 
