@@ -24,7 +24,8 @@ namespace Mp3AlbumCoverUpdater
 
 		WebClient myWebClient = new WebClient();
 		ArrayList imgUrls;
-		int iThread;
+		const int maxThreads = 10;
+		const int maxImages = 15;
 		Mp3File Mp3File = null;
 		string selectedPath = "";
 		DataTable dtResult = null;
@@ -46,41 +47,47 @@ namespace Mp3AlbumCoverUpdater
 			btnStart.Enabled = false;       
 									
 			foreach (var provider in Program.Providers) {
-				if(provider.ID == cobEngine.Text){
+				if (provider.ID == cobEngine.Text) {
 					selectedProvider = provider;
 				}
 			}
-			string searchUrl =  selectedProvider.Url + txtKeyWord.Text;
+			
+			string searchUrl = selectedProvider.Url + txtKeyWord.Text;
 			Logger.Log("searchUrl : " + searchUrl);
-			imgUrls = GetHyperLinks( GetHtml(searchUrl));
+			imgUrls = GetHyperLinks(GetHtml(searchUrl));
 			
 			flpPicture.Controls.Clear();
-			iThread = 10;
-			int iSum = imgUrls.Count;
-			int iAve = iSum / iThread;
-			int iMod = iSum % iThread;
 			
-			Logger.Log("imgUrls.Count : " + imgUrls.Count);
-
+			int urlsCount = imgUrls.Count > maxImages ? maxImages : imgUrls.Count;
+			int urlsPerBatch = urlsCount / maxThreads;
+			int urlsRemaining = urlsCount % maxThreads;			
+			Logger.Log("urlsCount : " + urlsCount);
+			Logger.Log("urlsPerBatch : " + urlsPerBatch);
+			Logger.Log("urlsRemaining : " + urlsRemaining);
+			
 			try {
-                
-				for (int i = 0; i < iThread; i++) {
+				
+				// start threads
+				for (int i = 0; i < maxThreads; i++) {
 					var ti = new ThreadInfo();
 					if (i == 0) {
 						ti.iStart = 0;
-						ti.iEnd = iAve - 1;
+						ti.iEnd = urlsPerBatch - 1;
 					} else {
-						ti.iStart = i * iAve;
-						ti.iEnd = (i * iAve) + iAve - 1;
+						ti.iStart = i * urlsPerBatch;
+						ti.iEnd = (i * urlsPerBatch) + urlsPerBatch - 1;
 					}
+					Logger.Log("starting ThreadPool, i  : " + i + " | " + "ti.iStart : " + ti.iStart + " | " + "ti.iEnd : " + ti.iEnd);
 					ThreadPool.QueueUserWorkItem(new WaitCallback(Mp3AlbumCoverUpdaterToForm), ti);
 				}
-				if (iMod != 0) {
+				
+				// check if urls remaining
+				if (urlsRemaining != 0) {
 					var ti = new ThreadInfo();
-					ti.iStart = iAve * iThread;
-					ti.iEnd = iSum - 1;
+					ti.iStart = urlsPerBatch * maxThreads;
+					ti.iEnd = urlsCount - 1;
+					Logger.Log("starting ThreadPool" + " | " + "ti.iStart : " + ti.iStart + " | " + "ti.iEnd : " + ti.iEnd);
 					ThreadPool.QueueUserWorkItem(new WaitCallback(Mp3AlbumCoverUpdaterToForm), ti);
-
 				}
 				
 				RegisteredWaitHandle registeredWaitHandle = null;
@@ -94,9 +101,9 @@ namespace Mp3AlbumCoverUpdater
 						registeredWaitHandle.Unregister(null);
 						btnStart.Invoke(new ChangeControlEnable(ChangeButtonEnable), new object[] { btnStart });
 					}
-				}), null, 1000, false);
-				
+				}), null, 1000, false);				
 				Cursor = Cursors.WaitCursor;
+				
 			} catch (Exception ex) {
 				Logger.Error("error while searching covers : " + ex);
 			} finally {
@@ -131,7 +138,7 @@ namespace Mp3AlbumCoverUpdater
 
 		void AddPictureBox(Image image)
 		{
-			Logger.Title("AddPictureBox");
+			// Logger.Title("AddPictureBox");
 			if (image != null) {
 				var picbox = new PictureBox();
 				picbox.Size = new Size(100, 100);
@@ -157,7 +164,7 @@ namespace Mp3AlbumCoverUpdater
 		
 		string GetHtml(string url)
 		{
-			Logger.Title("GetHyperLinks");
+			Logger.Title("GetHtml");
 			Logger.Log("url : " + url);
 			
 			string html = "";
@@ -197,12 +204,12 @@ namespace Mp3AlbumCoverUpdater
 
 		Image GetUrlImage(string url)
 		{
-			Logger.Title("GetUrlImage");
-			Logger.Log("url : " + url);
+			//Logger.Title("GetUrlImage");
+			//Logger.Log("url : " + url);
+			//Logger.Log("referer : " + selectedProvider.Referer);
 			
 			var request = (HttpWebRequest)WebRequest.Create(url);
-			request.Method = "GET";	
-			Logger.Log("referer : " + selectedProvider.Referer);
+			request.Method = "GET";				
 			request.Referer = selectedProvider.Referer;
 			request.ContentType = "application/x-www-form-urlencoded";
 			Image image;
@@ -334,7 +341,7 @@ namespace Mp3AlbumCoverUpdater
 
 		void ShowErrorList()
 		{
-			foreach (var error in listError){
+			foreach (var error in listError) {
 				Logger.Error(error);
 			}
 			listError.Clear();
