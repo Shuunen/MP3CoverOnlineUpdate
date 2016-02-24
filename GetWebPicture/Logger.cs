@@ -24,6 +24,7 @@ namespace Mp3AlbumCoverUpdater
 		static bool hadError = false;
 		static string logPrefix, logSuffix, logSpaces;
 		const int logMargin = 24;
+		const string logDateFormat = "hh:mm:ss tt";
 		
 		public static Logger Instance {
 			get {
@@ -39,7 +40,7 @@ namespace Mp3AlbumCoverUpdater
 		
 		public static void Log(string str)
 		{
-			logPrefix = "[ log ] ";
+			logPrefix = "[ " + DateTime.Now.ToString(logDateFormat) + "- log ] ";
 			logSuffix = "";
 			WriteLine(str);
 		}
@@ -61,7 +62,7 @@ namespace Mp3AlbumCoverUpdater
 		public static void Error(string str)
 		{
 			hadError = true;
-			logPrefix = "\n\n[ ERROR ] ";
+			logPrefix = "\n\n" + "[ " + DateTime.Now.ToString(logDateFormat) + "- ERROR ] ";
 			logSuffix = "\n\n";
 			WriteLine(str);
 		}
