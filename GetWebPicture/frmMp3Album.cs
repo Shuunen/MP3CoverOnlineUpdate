@@ -277,19 +277,21 @@ namespace Mp3AlbumCoverUpdater
 
 		void OpenFile_Click(object sender, EventArgs e)
 		{
+			Logger.Title("OpenFile_Click");
 			var fbd = new FolderBrowserDialog();
-			if (fbd.ShowDialog() == DialogResult.OK) {
-                
-               
+			if (fbd.ShowDialog() == DialogResult.OK) {                            
 				try {
 					selectedPath = fbd.SelectedPath;
+					Logger.Log("selectedPath : " + selectedPath);
 					var frm = new frmWaitingBox(new EventHandler<EventArgs>(GetFiles), 30 * 60 * 1000, "", false, true);
 					if (frm.ShowDialog() == DialogResult.OK) {
 						dgvList.DataSource = dtResult;
 					}
 				} catch (Exception ex) {
-					Logger.Error("error while toto : " + ex);
+					Logger.Error("error while frmWaitingBox : " + ex);
 				}                           
+			} else {
+				Logger.Log("no selected path");
 			}
            
 		}
