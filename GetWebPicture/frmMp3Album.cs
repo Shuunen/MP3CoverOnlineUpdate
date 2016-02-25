@@ -32,6 +32,7 @@ namespace Mp3AlbumCoverUpdater
 		DataTable tableResults = null;
 		List<string> listError = new List<string>();
 		Provider selectedProvider;
+		RegisteredWaitHandle threadPool = null;
 		
 		const string regexMultipleSpaces = @"\s+";
 		const string regexPotentialSeparators = @"[_-]+";
@@ -50,10 +51,10 @@ namespace Mp3AlbumCoverUpdater
 
 		void btnSearch_Click(object sender, EventArgs e)
 		{
-			SetLoadingStatus(true);
+			SetSearching(true);
 									
 			foreach (var provider in Program.Providers) {
-				if (provider.ID == cobEngine.Text) {
+				if (provider.ID == providerList.Text) {
 					selectedProvider = provider;
 				}
 			}
@@ -77,15 +78,12 @@ namespace Mp3AlbumCoverUpdater
 			// if no url to parse
 			if (urlsCount == 0) {
 				Logger.Log("no covers found");
-				SetLoadingStatus(false);
+				SetSearching(false);
 				btnSearch.Text = "no covers found";
 				return;
 			}
 			
-			try {
-									
-				Cursor = Cursors.WaitCursor;
-				
+			try {			
 				// start threads
 				for (int i = 0; i < maxThreads; i++) {
 					var ti = new ThreadInfo();
@@ -108,19 +106,20 @@ namespace Mp3AlbumCoverUpdater
 					Logger.Log("starting ThreadPool" + " | " + "ti.iStart : " + ti.iStart + " | " + "ti.iEnd : " + ti.iEnd);
 					ThreadPool.QueueUserWorkItem(new WaitCallback(Mp3AlbumCoverUpdaterToForm), ti);
 				}
-				
-				RegisteredWaitHandle registeredWaitHandle = null;
-				registeredWaitHandle = ThreadPool.RegisterWaitForSingleObject(new AutoResetEvent(false), new WaitOrTimerCallback(delegate(object obj, bool timeout) {
+								
+				threadPool = ThreadPool.RegisterWaitForSingleObject(new AutoResetEvent(false), new WaitOrTimerCallback(delegate(object obj, bool timeout) {
 					int workerThreads = 0;
 					int maxWordThreads = 0;
 					int compleThreads = 0;
 					ThreadPool.GetAvailableThreads(out workerThreads, out compleThreads);
-					ThreadPool.GetMaxThreads(out maxWordThreads, out compleThreads);                   
+					ThreadPool.GetMaxThreads(out maxWordThreads, out compleThreads);         
+					Logger.Log("workerThreads & maxWordThreads : " + workerThreads + " & " + maxWordThreads);					
 					if (workerThreads == maxWordThreads) {
-						registeredWaitHandle.Unregister(null);
-						Logger.Log("thread workers ended !");
-						Cursor = Cursors.Default;
-						SetLoadingStatus(false);
+						threadPool.Unregister(null);
+						Logger.Log("threads ended !");
+						SetSearching(false);
+					} else {
+						Logger.Log("threads still working !");
 					}
 				}), null, 1000, false);			
 				
@@ -129,15 +128,22 @@ namespace Mp3AlbumCoverUpdater
 			} 
 		}
 
-		void SetLoadingStatus(Boolean isLoading)
+		void SetSearching(Boolean isLoading)
 		{
 			if (isLoading) {
+				Cursor = Cursors.WaitCursor;
 				btnSearch.Text = "Searching...";            
 				btnSearch.Enabled = false;       
 			} else {
+				Cursor = Cursors.Default;
 				btnSearch.Text = "Search";
 				btnSearch.Enabled = true;
 			}
+		}
+		
+		bool IsSearching()
+		{
+			return !(btnSearch.Enabled);
 		}
 
 		void Mp3AlbumCoverUpdaterToForm(Object threadinfo)
@@ -253,7 +259,7 @@ namespace Mp3AlbumCoverUpdater
 			Logger.Title("GUI Load");
 			string defaultProvider = Program.Providers[0].ID;
 			Logger.Log("set default provider to : " + defaultProvider);
-			cobEngine.Text = defaultProvider;
+			providerList.Text = defaultProvider;
 			MouseWheel += Form1_MouseWheel;
 			
 			UpdateBtnOnlyMissing();
@@ -275,6 +281,11 @@ namespace Mp3AlbumCoverUpdater
 
 		void btnUpdate_Click(object sender, EventArgs e)
 		{
+			if (IsSearching()) {
+				Logger.Log("applyed new cover while searching, stopping search...");
+				StopSearch();
+			}
+						
 			selectedMp3File.TagHandler.Picture = selectedCover.Image;
 			selectedMp3File.Update();
 			fileList.SelectedRows[0].Cells[2].Value = selectedCover.Image;
@@ -290,6 +301,12 @@ namespace Mp3AlbumCoverUpdater
 		void OpenFile_Click(object sender, EventArgs e)
 		{
 			Logger.Title("OpenFile_Click");
+			
+			if (IsSearching()) {
+				Logger.Log("opened folder selection popin while searching, stopping search...");
+				StopSearch();
+			}
+			
 			var fbd = new FolderBrowserDialog();
 			if (fbd.ShowDialog() == DialogResult.OK) {                            
 				try {					
@@ -320,7 +337,7 @@ namespace Mp3AlbumCoverUpdater
 			try {
 				foreach (FileInfo file in files) {					
 					var mp3File = new Mp3File(file.FullName);
-					if(ReadSetting("onlyMissing", "yes") == "yes" && mp3File.TagHandler.Picture != null){
+					if (ReadSetting("onlyMissing", "yes") == "yes" && mp3File.TagHandler.Picture != null) {
 						continue;
 					}					
 									
@@ -350,10 +367,32 @@ namespace Mp3AlbumCoverUpdater
 				fileList.DataSource = tableResults;
 			}
 		}
+
+		void StopSearch()
+		{
+			Logger.Log("stop remaining processes in : threadPool");
+			threadPool.Unregister(null);
+			SetSearching(false);
+		}
+		
+		void providerList_SelectionChanged(object sender, System.EventArgs e)
+		{
+			Logger.Log("providerList is now set on : " + providerList.Text);
+			if (IsSearching()) {
+				Logger.Log("changed provider selection while searching, stopping search...");
+				StopSearch();
+			}
+		}
+
 		void fileList_SelectionChanged(object sender, EventArgs e)
 		{
 			if (fileList.SelectedRows.Count <= 0) {
 				return;
+			}
+			
+			if (IsSearching()) {
+				Logger.Log("changed song selection while searching, stopping search...");
+				StopSearch();
 			}
 
 			try {
@@ -364,14 +403,8 @@ namespace Mp3AlbumCoverUpdater
 				searchText = Regex.Replace(searchText, regexPotentialSeparators, " "); // replace potential separators by spaces
 				searchText = Regex.Replace(searchText, regexUnwantedChars, ""); // remove unwanted chars
 				searchText = Regex.Replace(searchText, regexMultipleSpaces, " ");
-				searchInput.Text = searchText;
-				if (btnSearch.Enabled) {
-					SetLoadingStatus(false);
-				} else {
-					Logger.Log("TODO : you changed song selection while searching, this should stop search");
-				}
+				searchInput.Text = searchText;				
 				currentCover.Image = selectedMp3FileInfo.AlbumCover;
-
 			} catch (Exception ex) {
 				Logger.Error("error while setting searchText & current cover : " + ex);
 				currentCover.Image = null;
@@ -385,6 +418,11 @@ namespace Mp3AlbumCoverUpdater
 
 		void btnOnlyMissing_Click(object sender, EventArgs e)
 		{
+			if (IsSearching()) {
+				Logger.Log("changed display filter while searching, stopping search...");
+				StopSearch();
+			}			
+			
 			string opposite = (ReadSetting("onlyMissing", "yes") == "yes") ? "no" : "yes";
 			AddUpdateAppSettings("onlyMissing", opposite);
 			UpdateBtnOnlyMissing();
@@ -414,7 +452,7 @@ namespace Mp3AlbumCoverUpdater
 			try {
 				var appSettings = ConfigurationManager.AppSettings;
 				result = appSettings[key] ?? fallback;
-				Logger.Log("setting " + key + " : " + result);
+				//Logger.Log("setting " + key + " : " + result);
 			} catch (Exception ex) {
 				Logger.Error("error reading setting : " + ex);
 			} 

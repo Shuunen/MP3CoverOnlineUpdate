@@ -23,7 +23,7 @@
 			OpenFile = new System.Windows.Forms.ToolStripMenuItem();
 			currentCover = new System.Windows.Forms.PictureBox();
 			fileList = new System.Windows.Forms.DataGridView();
-			cobEngine = new System.Windows.Forms.ComboBox();
+			providerList = new System.Windows.Forms.ComboBox();
 			flpPicture = new System.Windows.Forms.FlowLayoutPanel();
 			label1 = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(selectedCover)).BeginInit();
@@ -115,17 +115,17 @@
 			fileList.TabIndex = 9;
 			fileList.SelectionChanged += fileList_SelectionChanged;
 			
-			// cobEngine
-			cobEngine.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			cobEngine.FormattingEnabled = true;
+			// providerList
+			providerList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			providerList.FormattingEnabled = true;
 			foreach (var provider in Program.Providers) {
-				cobEngine.Items.AddRange(new object[] { provider.ID });
-			}
-			
-			cobEngine.Location = new System.Drawing.Point(353, 27);
-			cobEngine.Name = "cobEngine";
-			cobEngine.Size = new System.Drawing.Size(64, 20);
-			cobEngine.TabIndex = 10;
+				providerList.Items.AddRange(new object[] { provider.ID });
+			}			
+			providerList.Location = new System.Drawing.Point(353, 27);
+			providerList.Name = "providerList";
+			providerList.Size = new System.Drawing.Size(64, 20);
+			providerList.TabIndex = 10;
+			providerList.SelectedValueChanged += providerList_SelectionChanged;
 			
 			// flpPicture
 			flpPicture.AutoScroll = true;
@@ -149,7 +149,7 @@
 			ClientSize = new System.Drawing.Size(975, 556);
 			Controls.Add(label1);
 			Controls.Add(flpPicture);
-			Controls.Add(cobEngine);
+			Controls.Add(providerList);
 			Controls.Add(fileList);
 			Controls.Add(btnUpdate);
 			Controls.Add(btnOnlyMissing);
@@ -181,7 +181,7 @@
 		System.Windows.Forms.ToolStripMenuItem OpenFile;
 		System.Windows.Forms.PictureBox currentCover;
 		System.Windows.Forms.DataGridView fileList;
-		System.Windows.Forms.ComboBox cobEngine;
+		System.Windows.Forms.ComboBox providerList;
 		System.Windows.Forms.FlowLayoutPanel flpPicture;
 		System.Windows.Forms.Label label1;
 	}
