@@ -1,4 +1,5 @@
 using System;
+using System.Configuration;
 using System.Data;
 using System.Text;
 using System.Net;
@@ -13,6 +14,7 @@ using System.Collections.Generic;
 using Mp3Lib;
 using Id3Lib;
 using System.IO.Compression;
+ 
 namespace Mp3AlbumCoverUpdater
 {
 	public partial class frmMp3Album : Form
@@ -24,11 +26,10 @@ namespace Mp3AlbumCoverUpdater
 
 		WebClient myWebClient = new WebClient();
 		ArrayList imgUrls;
-		const int maxThreads = 3;
-		const int maxImages = 15;
-		Mp3File Mp3File = null;
-		string selectedPath = "";
-		DataTable dtResult = null;
+		Mp3File selectedMp3File;
+		Mp3FileInfo selectedMp3FileInfo;
+		string selectedPath = ReadSetting("selectedPath");
+		DataTable tableResults = null;
 		List<string> listError = new List<string>();
 		Provider selectedProvider;
 		
@@ -47,7 +48,7 @@ namespace Mp3AlbumCoverUpdater
 			public int iEnd { get; set; }
 		}
 
-		void btnStart_Click(object sender, EventArgs e)
+		void btnSearch_Click(object sender, EventArgs e)
 		{
 			SetLoadingStatus(true);
 									
@@ -57,11 +58,14 @@ namespace Mp3AlbumCoverUpdater
 				}
 			}
 			
-			string searchUrl = selectedProvider.Url + txtKeyWord.Text;
+			string searchUrl = selectedProvider.Url + searchInput.Text;
 			Logger.Log("searchUrl : " + searchUrl);
 			imgUrls = GetHyperLinks(GetHtml(searchUrl));
 			
 			flpPicture.Controls.Clear();
+						
+			var maxThreads = int.Parse(ReadSetting("maxThreads", "3"));
+			var maxImages = int.Parse(ReadSetting("maxImages", "15"));
 			
 			int urlsCount = imgUrls.Count > maxImages ? maxImages : imgUrls.Count;
 			int urlsPerBatch = urlsCount / maxThreads;
@@ -74,7 +78,7 @@ namespace Mp3AlbumCoverUpdater
 			if (urlsCount == 0) {
 				Logger.Log("no covers found");
 				SetLoadingStatus(false);
-				btnStart.Text = "no covers found";
+				btnSearch.Text = "no covers found";
 				return;
 			}
 			
@@ -128,11 +132,11 @@ namespace Mp3AlbumCoverUpdater
 		void SetLoadingStatus(Boolean isLoading)
 		{
 			if (isLoading) {
-				btnStart.Text = "Searching...";            
-				btnStart.Enabled = false;       
+				btnSearch.Text = "Searching...";            
+				btnSearch.Enabled = false;       
 			} else {
-				btnStart.Text = "Search";
-				btnStart.Enabled = true;
+				btnSearch.Text = "Search";
+				btnSearch.Enabled = true;
 			}
 		}
 
@@ -173,7 +177,7 @@ namespace Mp3AlbumCoverUpdater
 		void picbox_Click(object sender, EventArgs e)
 		{
 			var picbox = sender as PictureBox;
-			ptbNew.Image = picbox.Image;
+			selectedCover.Image = picbox.Image;
 			if (picbox.Image == null) {
 				return;
 			}
@@ -229,12 +233,11 @@ namespace Mp3AlbumCoverUpdater
 			var request = (HttpWebRequest)WebRequest.Create(url);
 			request.Method = "GET";				
 			request.Referer = selectedProvider.Referer;
-			request.ContentType = "application/x-www-form-urlencoded";
+			request.ContentType = "application/x-www-form-urlencoded";			
 			Image image;
-			Stream myStream;
 			try {
 				var response = (HttpWebResponse)request.GetResponse();
-				myStream = response.GetResponseStream();
+				var myStream = response.GetResponseStream();
 				image = Image.FromStream(myStream); 
 				myStream.Close();
 			} catch (Exception ex) {
@@ -252,41 +255,44 @@ namespace Mp3AlbumCoverUpdater
 			Logger.Log("set default provider to : " + defaultProvider);
 			cobEngine.Text = defaultProvider;
 			MouseWheel += Form1_MouseWheel;
+			
+			if (selectedPath.Length > 0) {
+				InitFilesLoading();
+			}
 		}
 		
 		void Form1_MouseWheel(object sender, MouseEventArgs e)
 		{
-			Logger.Log("Form1_MouseWheel");
 			var aPoint = new Point(e.X, e.Y);
 			aPoint.Offset(Location.X, Location.Y);
 			var aRec1 = new Rectangle(flpPicture.Location.X, flpPicture.Location.Y, flpPicture.Width, flpPicture.Height);
-          
-
 			if (RectangleToScreen(aRec1).Contains(aPoint)) {
 				flpPicture.AutoScrollPosition = new Point(0, flpPicture.VerticalScroll.Value - e.Delta / 20);
 			}
-        
 		}
 
 		void btnUpdate_Click(object sender, EventArgs e)
 		{
-			Mp3File.TagHandler.Picture = ptbNew.Image;
-			Mp3File.Update();
-			dgvList.SelectedRows[0].Cells[2].Value = ptbNew.Image;
+			selectedMp3File.TagHandler.Picture = selectedCover.Image;
+			selectedMp3File.Update();
+			fileList.SelectedRows[0].Cells[2].Value = selectedCover.Image;
 		}
 
+		void SetSelectedPath(string path)
+		{
+			selectedPath = path;
+			Logger.Log("selectedPath : " + path);		
+			AddUpdateAppSettings("selectedPath", path);			 
+		}
+		
 		void OpenFile_Click(object sender, EventArgs e)
 		{
 			Logger.Title("OpenFile_Click");
 			var fbd = new FolderBrowserDialog();
 			if (fbd.ShowDialog() == DialogResult.OK) {                            
-				try {
-					selectedPath = fbd.SelectedPath;
-					Logger.Log("selectedPath : " + selectedPath);
-					var frm = new frmWaitingBox(new EventHandler<EventArgs>(GetFiles), 30 * 60 * 1000, "", false, true);
-					if (frm.ShowDialog() == DialogResult.OK) {
-						dgvList.DataSource = dtResult;
-					}
+				try {					
+					SetSelectedPath(fbd.SelectedPath);
+					InitFilesLoading();
 				} catch (Exception ex) {
 					Logger.Error("error while frmWaitingBox : " + ex);
 				}                           
@@ -298,59 +304,70 @@ namespace Mp3AlbumCoverUpdater
 
 		void GetFiles(object sender, EventArgs e)
 		{
-			var dt = new DataTable();
-			var dc1 = new DataColumn("Filename", typeof(string));
-			var dc2 = new DataColumn("Path", typeof(string));
-			var dc3 = new DataColumn("Cover", typeof(Image));
-           
-			dt.Columns.Add(dc1);
-			dt.Columns.Add(dc2);
-			dt.Columns.Add(dc3);
-			var di = new DirectoryInfo(selectedPath);
-			FileInfo[] files1 = di.GetFiles("*.mp3");
-			string title = "";
+			var table = new DataTable();
+			var col1 = new DataColumn("Filename", typeof(string));
+			var col2 = new DataColumn("Path", typeof(string));
+			var col3 = new DataColumn("Cover", typeof(Image));           
+			table.Columns.Add(col1);
+			table.Columns.Add(col2);
+			table.Columns.Add(col3);
+			
+			var dir = new DirectoryInfo(selectedPath);
+			var files = dir.GetFiles("*.mp3");
+			var currentFile = "";
 			try {
-				foreach (FileInfo fi in files1) {
-					DataRow dr = dt.NewRow();
-					dr["Filename"] = fi.Name;
-					dr["Path"] = fi.FullName;
-					title = fi.Name;
-					Mp3File = new Mp3File(fi.FullName);
-					dr["Cover"] = Mp3File.TagHandler.Picture;
-					dt.Rows.Add(dr.ItemArray);
+				foreach (FileInfo file in files) {
+					var row = table.NewRow();
+					var mp3File = new Mp3File(file.FullName);
+					currentFile = file.Name;
+					row["Filename"] = file.Name;
+					row["Path"] = file.FullName;					
+					row["Cover"] = mp3File.TagHandler.Picture;
+					table.Rows.Add(row.ItemArray);
 				}
 			} catch (Exception ex) {
-				Logger.Error("error while processing  " + title + " : " + ex);
+				Logger.Error("error while processing file : " + currentFile + "\n" + ex);
 			} finally {
-				dtResult = dt;
+				tableResults = table;
 			}           
             
 		}
 
-		void dgvList_SelectionChanged(object sender, EventArgs e)
+		void InitFilesLoading()
 		{
-			if (dgvList.SelectedRows.Count <= 0)
+			Logger.Title("InitFilesLoading");
+			Logger.Log("selectedPath : " + selectedPath);
+			
+			var frm = new frmWaitingBox(new EventHandler<EventArgs>(GetFiles), 30 * 60 * 1000, "", false, true);
+			if (frm.ShowDialog() == DialogResult.OK) {
+				fileList.DataSource = tableResults;
+			}
+		}
+		void fileList_SelectionChanged(object sender, EventArgs e)
+		{
+			if (fileList.SelectedRows.Count <= 0) {
 				return;
+			}
 
 			try {
-				string path = dgvList.SelectedRows[0].Cells["Path"].Value.ToString();
-				Mp3File = new Mp3File(path);
-				var mp3fileinfo = new Mp3FileInfo(path);				
-				string searchText = mp3fileinfo.Title.Trim() + " " + mp3fileinfo.Artist.Trim();
+				string path = fileList.SelectedRows[0].Cells["Path"].Value.ToString();
+				selectedMp3File = new Mp3File(path);
+				selectedMp3FileInfo = new Mp3FileInfo(path);				
+				string searchText = selectedMp3FileInfo.Title.Trim() + " " + selectedMp3FileInfo.Artist.Trim();
 				searchText = Regex.Replace(searchText, regexPotentialSeparators, " "); // replace potential separators by spaces
 				searchText = Regex.Replace(searchText, regexUnwantedChars, ""); // remove unwanted chars
 				searchText = Regex.Replace(searchText, regexMultipleSpaces, " ");
-				txtKeyWord.Text = searchText;
-				if (btnStart.Enabled) {
+				searchInput.Text = searchText;
+				if (btnSearch.Enabled) {
 					SetLoadingStatus(false);
 				} else {
 					Logger.Log("TODO : you changed song selection while searching, this should stop search");
 				}
-				ptpOld.Image = mp3fileinfo.AlbumCover;
+				currentCover.Image = selectedMp3FileInfo.AlbumCover;
 
 			} catch (Exception ex) {
 				Logger.Error("error while setting searchText & current cover : " + ex);
-				ptpOld.Image = null;
+				currentCover.Image = null;
 			}
 		}
        
@@ -360,12 +377,12 @@ namespace Mp3AlbumCoverUpdater
 			MessageBox.Show("btnAutoUpdate... todo :)");
 		}
 
-		void ptbNew_DoubleClick(object sender, EventArgs e)
+		void selectedCover_DoubleClick(object sender, EventArgs e)
 		{
 			var ofd = new OpenFileDialog();
 			ofd.Filter = "Image|*.jpg;*.jpeg;*.png;*.bmp;*.gif";
 			if (ofd.ShowDialog() == DialogResult.OK) {
-				ptbNew.Image = Image.FromFile(ofd.FileName);
+				selectedCover.Image = Image.FromFile(ofd.FileName);
 			}
 		}
 
@@ -375,6 +392,36 @@ namespace Mp3AlbumCoverUpdater
 				Logger.Error(error);
 			}
 			listError.Clear();
+		}
+		
+		static string ReadSetting(string key, string fallback = "")
+		{
+			string result = "";
+			try {
+				var appSettings = ConfigurationManager.AppSettings;
+				result = appSettings[key] ?? fallback;
+				Logger.Log("setting " + key + " : " + result);
+			} catch (ConfigurationErrorsException) {
+				Logger.Error("Error reading app settings");
+			} 
+			return result;
+		}
+		
+		static void AddUpdateAppSettings(string key, string value)
+		{
+			try {
+				var configFile = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+				var settings = configFile.AppSettings.Settings;
+				if (settings[key] == null) {
+					settings.Add(key, value);
+				} else {
+					settings[key].Value = value;
+				}
+				configFile.Save(ConfigurationSaveMode.Modified);
+				ConfigurationManager.RefreshSection(configFile.AppSettings.SectionInformation.Name);
+			} catch (ConfigurationErrorsException) {
+				Console.WriteLine("Error writing app settings");
+			}
 		}
 
 		string PostData(string targetUrl, string postDataStr, string refererUrl)

@@ -14,48 +14,48 @@
 
 		void InitializeComponent()
 		{
-			btnStart = new System.Windows.Forms.Button();
-			txtKeyWord = new System.Windows.Forms.TextBox();
-			ptbNew = new System.Windows.Forms.PictureBox();
+			btnSearch = new System.Windows.Forms.Button();
+			searchInput = new System.Windows.Forms.TextBox();
+			selectedCover = new System.Windows.Forms.PictureBox();
 			btnAutoUpdate = new System.Windows.Forms.Button();
 			btnUpdate = new System.Windows.Forms.Button();
 			menuStrip1 = new System.Windows.Forms.MenuStrip();
 			OpenFile = new System.Windows.Forms.ToolStripMenuItem();
-			ptpOld = new System.Windows.Forms.PictureBox();
-			dgvList = new System.Windows.Forms.DataGridView();
+			currentCover = new System.Windows.Forms.PictureBox();
+			fileList = new System.Windows.Forms.DataGridView();
 			cobEngine = new System.Windows.Forms.ComboBox();
 			flpPicture = new System.Windows.Forms.FlowLayoutPanel();
 			label1 = new System.Windows.Forms.Label();
-			((System.ComponentModel.ISupportInitialize)(ptbNew)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(selectedCover)).BeginInit();
 			menuStrip1.SuspendLayout();
-			((System.ComponentModel.ISupportInitialize)(ptpOld)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(dgvList)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(currentCover)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(fileList)).BeginInit();
 			SuspendLayout();
 			
-			// btnStart
-			btnStart.Location = new System.Drawing.Point(647, 25);
-			btnStart.Name = "btnStart";
-			btnStart.Size = new System.Drawing.Size(70, 23);
-			btnStart.TabIndex = 0;
-			btnStart.Text = "Search";
-			btnStart.UseVisualStyleBackColor = true;
-			btnStart.Click += btnStart_Click;
+			// btnSearch
+			btnSearch.Location = new System.Drawing.Point(647, 25);
+			btnSearch.Name = "btnSearch";
+			btnSearch.Size = new System.Drawing.Size(70, 23);
+			btnSearch.TabIndex = 0;
+			btnSearch.Text = "Search";
+			btnSearch.UseVisualStyleBackColor = true;
+			btnSearch.Click += btnSearch_Click;
 			
-			// txtKeyWord
-			txtKeyWord.Location = new System.Drawing.Point(419, 26);
-			txtKeyWord.Name = "txtKeyWord";
-			txtKeyWord.Size = new System.Drawing.Size(228, 21);
-			txtKeyWord.TabIndex = 2;
+			// searchInput
+			searchInput.Location = new System.Drawing.Point(419, 26);
+			searchInput.Name = "searchInput";
+			searchInput.Size = new System.Drawing.Size(228, 21);
+			searchInput.TabIndex = 2;
 			
-			// ptbNew
-			ptbNew.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			ptbNew.Location = new System.Drawing.Point(723, 281);
-			ptbNew.Name = "ptbNew";
-			ptbNew.Size = new System.Drawing.Size(240, 240);
-			ptbNew.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-			ptbNew.TabIndex = 5;
-			ptbNew.TabStop = false;
-			ptbNew.DoubleClick += ptbNew_DoubleClick;
+			// selectedCover
+			selectedCover.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+			selectedCover.Location = new System.Drawing.Point(723, 281);
+			selectedCover.Name = "selectedCover";
+			selectedCover.Size = new System.Drawing.Size(240, 240);
+			selectedCover.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+			selectedCover.TabIndex = 5;
+			selectedCover.TabStop = false;
+			selectedCover.DoubleClick += selectedCover_DoubleClick;
 			
 			// btnAutoUpdate
 			btnAutoUpdate.Location = new System.Drawing.Point(737, 524);
@@ -91,29 +91,29 @@
 			OpenFile.Text = "Open folder";
 			OpenFile.Click += OpenFile_Click;
 			
-			// ptpOld
-			ptpOld.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			ptpOld.Location = new System.Drawing.Point(723, 27);
-			ptpOld.Name = "ptpOld";
-			ptpOld.Size = new System.Drawing.Size(240, 240);
-			ptpOld.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-			ptpOld.TabIndex = 5;
-			ptpOld.TabStop = false;
+			// currentCover
+			currentCover.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+			currentCover.Location = new System.Drawing.Point(723, 27);
+			currentCover.Name = "currentCover";
+			currentCover.Size = new System.Drawing.Size(240, 240);
+			currentCover.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+			currentCover.TabIndex = 5;
+			currentCover.TabStop = false;
 			
-			// dgvList
-			dgvList.AllowUserToAddRows = false;
-			dgvList.AllowUserToDeleteRows = false;
-			dgvList.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-			dgvList.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-			dgvList.Dock = System.Windows.Forms.DockStyle.Left;
-			dgvList.Location = new System.Drawing.Point(0, 24);
-			dgvList.Name = "dgvList";
-			dgvList.ReadOnly = true;
-			dgvList.RowTemplate.Height = 23;
-			dgvList.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-			dgvList.Size = new System.Drawing.Size(347, 532);
-			dgvList.TabIndex = 9;
-			dgvList.SelectionChanged += dgvList_SelectionChanged;
+			// fileList
+			fileList.AllowUserToAddRows = false;
+			fileList.AllowUserToDeleteRows = false;
+			fileList.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+			fileList.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+			fileList.Dock = System.Windows.Forms.DockStyle.Left;
+			fileList.Location = new System.Drawing.Point(0, 24);
+			fileList.Name = "fileList";
+			fileList.ReadOnly = true;
+			fileList.RowTemplate.Height = 23;
+			fileList.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+			fileList.Size = new System.Drawing.Size(347, 532);
+			fileList.TabIndex = 9;
+			fileList.SelectionChanged += fileList_SelectionChanged;
 			
 			// cobEngine
 			cobEngine.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
@@ -150,37 +150,37 @@
 			Controls.Add(label1);
 			Controls.Add(flpPicture);
 			Controls.Add(cobEngine);
-			Controls.Add(dgvList);
+			Controls.Add(fileList);
 			Controls.Add(btnUpdate);
 			Controls.Add(btnAutoUpdate);
-			Controls.Add(ptpOld);
-			Controls.Add(ptbNew);
-			Controls.Add(txtKeyWord);
-			Controls.Add(btnStart);
+			Controls.Add(currentCover);
+			Controls.Add(selectedCover);
+			Controls.Add(searchInput);
+			Controls.Add(btnSearch);
 			Controls.Add(menuStrip1);
 			MainMenuStrip = menuStrip1;
 			Name = "frmMp3Album";
 			StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			Text = "Mp3 Cover Updater";
 			Load += new System.EventHandler(Form1_Load);
-			((System.ComponentModel.ISupportInitialize)(ptbNew)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(selectedCover)).EndInit();
 			menuStrip1.ResumeLayout(false);
 			menuStrip1.PerformLayout();
-			((System.ComponentModel.ISupportInitialize)(ptpOld)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(dgvList)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(currentCover)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(fileList)).EndInit();
 			ResumeLayout(false);
 			PerformLayout();
 		}
 
-		System.Windows.Forms.Button btnStart;
-		System.Windows.Forms.TextBox txtKeyWord;
-		System.Windows.Forms.PictureBox ptbNew;
+		System.Windows.Forms.Button btnSearch;
+		System.Windows.Forms.TextBox searchInput;
+		System.Windows.Forms.PictureBox selectedCover;
 		System.Windows.Forms.Button btnAutoUpdate;
 		System.Windows.Forms.Button btnUpdate;
 		System.Windows.Forms.MenuStrip menuStrip1;
 		System.Windows.Forms.ToolStripMenuItem OpenFile;
-		System.Windows.Forms.PictureBox ptpOld;
-		System.Windows.Forms.DataGridView dgvList;
+		System.Windows.Forms.PictureBox currentCover;
+		System.Windows.Forms.DataGridView fileList;
 		System.Windows.Forms.ComboBox cobEngine;
 		System.Windows.Forms.FlowLayoutPanel flpPicture;
 		System.Windows.Forms.Label label1;
