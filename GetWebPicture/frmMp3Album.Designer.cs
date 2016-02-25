@@ -17,7 +17,7 @@
 			btnSearch = new System.Windows.Forms.Button();
 			searchInput = new System.Windows.Forms.TextBox();
 			selectedCover = new System.Windows.Forms.PictureBox();
-			btnAutoUpdate = new System.Windows.Forms.Button();
+			btnOnlyMissing = new System.Windows.Forms.Button();
 			btnUpdate = new System.Windows.Forms.Button();
 			menuStrip1 = new System.Windows.Forms.MenuStrip();
 			OpenFile = new System.Windows.Forms.ToolStripMenuItem();
@@ -57,14 +57,14 @@
 			selectedCover.TabStop = false;
 			selectedCover.DoubleClick += selectedCover_DoubleClick;
 			
-			// btnAutoUpdate
-			btnAutoUpdate.Location = new System.Drawing.Point(737, 524);
-			btnAutoUpdate.Name = "btnAutoUpdate";
-			btnAutoUpdate.Size = new System.Drawing.Size(75, 23);
-			btnAutoUpdate.TabIndex = 6;
-			btnAutoUpdate.Text = "Auto update";
-			btnAutoUpdate.UseVisualStyleBackColor = true;
-			btnAutoUpdate.Click += btnAutoUpdate_Click;
+			// btnOnlyMissing
+			btnOnlyMissing.Location = new System.Drawing.Point(737, 524);
+			btnOnlyMissing.Name = "btnOnlyMissing";
+			btnOnlyMissing.Size = new System.Drawing.Size(130, 23);
+			btnOnlyMissing.TabIndex = 6;
+			btnOnlyMissing.Text = "labelDefault";
+			btnOnlyMissing.UseVisualStyleBackColor = true;
+			btnOnlyMissing.Click += btnOnlyMissing_Click;
 			
 			// btnUpdate
 			btnUpdate.Location = new System.Drawing.Point(876, 525);
@@ -152,7 +152,7 @@
 			Controls.Add(cobEngine);
 			Controls.Add(fileList);
 			Controls.Add(btnUpdate);
-			Controls.Add(btnAutoUpdate);
+			Controls.Add(btnOnlyMissing);
 			Controls.Add(currentCover);
 			Controls.Add(selectedCover);
 			Controls.Add(searchInput);
@@ -175,7 +175,7 @@
 		System.Windows.Forms.Button btnSearch;
 		System.Windows.Forms.TextBox searchInput;
 		System.Windows.Forms.PictureBox selectedCover;
-		System.Windows.Forms.Button btnAutoUpdate;
+		System.Windows.Forms.Button btnOnlyMissing;
 		System.Windows.Forms.Button btnUpdate;
 		System.Windows.Forms.MenuStrip menuStrip1;
 		System.Windows.Forms.ToolStripMenuItem OpenFile;

@@ -256,6 +256,8 @@ namespace Mp3AlbumCoverUpdater
 			cobEngine.Text = defaultProvider;
 			MouseWheel += Form1_MouseWheel;
 			
+			UpdateBtnOnlyMissing();
+						
 			if (selectedPath.Length > 0) {
 				InitFilesLoading();
 			}
@@ -316,13 +318,18 @@ namespace Mp3AlbumCoverUpdater
 			var files = dir.GetFiles("*.mp3");
 			var currentFile = "";
 			try {
-				foreach (FileInfo file in files) {
-					var row = table.NewRow();
+				foreach (FileInfo file in files) {					
 					var mp3File = new Mp3File(file.FullName);
+					if(ReadSetting("onlyMissing", "yes") == "yes" && mp3File.TagHandler.Picture != null){
+						continue;
+					}					
+									
 					currentFile = file.Name;
+					
+					var row = table.NewRow();	
 					row["Filename"] = file.Name;
 					row["Path"] = file.FullName;					
-					row["Cover"] = mp3File.TagHandler.Picture;
+					row["Cover"] = mp3File.TagHandler.Picture;					
 					table.Rows.Add(row.ItemArray);
 				}
 			} catch (Exception ex) {
@@ -370,11 +377,18 @@ namespace Mp3AlbumCoverUpdater
 				currentCover.Image = null;
 			}
 		}
-       
 
-		void btnAutoUpdate_Click(object sender, EventArgs e)
+		void UpdateBtnOnlyMissing()
 		{
-			MessageBox.Show("btnAutoUpdate... todo :)");
+			btnOnlyMissing.Text = (ReadSetting("onlyMissing", "yes") == "yes") ? "Show all track" : "Show only missing";
+		}
+
+		void btnOnlyMissing_Click(object sender, EventArgs e)
+		{
+			string opposite = (ReadSetting("onlyMissing", "yes") == "yes") ? "no" : "yes";
+			AddUpdateAppSettings("onlyMissing", opposite);
+			UpdateBtnOnlyMissing();
+			InitFilesLoading();
 		}
 
 		void selectedCover_DoubleClick(object sender, EventArgs e)
@@ -401,8 +415,8 @@ namespace Mp3AlbumCoverUpdater
 				var appSettings = ConfigurationManager.AppSettings;
 				result = appSettings[key] ?? fallback;
 				Logger.Log("setting " + key + " : " + result);
-			} catch (ConfigurationErrorsException) {
-				Logger.Error("Error reading app settings");
+			} catch (Exception ex) {
+				Logger.Error("error reading setting : " + ex);
 			} 
 			return result;
 		}
@@ -417,11 +431,12 @@ namespace Mp3AlbumCoverUpdater
 				} else {
 					settings[key].Value = value;
 				}
+				Logger.Log("now setting " + key + " is set to : " + value);
 				configFile.Save(ConfigurationSaveMode.Modified);
 				ConfigurationManager.RefreshSection(configFile.AppSettings.SectionInformation.Name);
-			} catch (ConfigurationErrorsException) {
-				Console.WriteLine("Error writing app settings");
-			}
+			} catch (Exception ex) {
+				Logger.Error("error writing setting : " + ex);
+			} 
 		}
 
 		string PostData(string targetUrl, string postDataStr, string refererUrl)
